@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken');
 const User = require("../models/User");
+const Cookie = require('js-cookie');
 const {UnauthenticatedError,BadRequestError}= require('../errors')
 const {StatusCodes}=require('http-status-codes')
-
+let Id;
 
 // Generate a JWT
 //When generating the token always the first parameter is the id(how to access the user) in an object
@@ -27,13 +28,18 @@ const signUp = async (req, res) => {
 
     const token = newUser.createJWT();
     newUser.tokens.push(token); // Add token to the tokens array
-    await newUser.save(); // Save the user with the new token
-    res.cookie("authToken", token, {
+    // await newUser.save(); // Save the user with the new token
+    res.cookie(`authToken-${newUser._id}`, {token,userId:newUser._id}, {
         httpOnly: true, // Secure cookie, inaccessible to JavaScript
         sameSite: "Lax", // Restrict cookie sharing for cross-site requests
         maxAge: 24 * 60 * 60 * 1000, // Expiry time (optional)
     });
-
+    res.cookie(`User`, {userId:newUser._id}, {
+        httpOnly: true, // Secure cookie, inaccessible to JavaScript
+        sameSite: "Lax", // Restrict cookie sharing for cross-site requests
+        maxAge: 24 * 60 * 60 * 1000, // Expiry time (optional)
+    });
+    req.session.userId = newUser._id;
     res.status(StatusCodes.CREATED).json({ message: "User registered successfully!",token,userId: UserId.split('"')[1]});
 };
 
@@ -58,53 +64,56 @@ const login =async (req, res) => {
     if (!isPasswordCorrect) {
         throw new UnauthenticatedError('Invalid Password');
     }
-
     const token = user.createJWT();
     user.tokens.push(token); // Add token to the tokens array
-    await user.save(); // Save the user with the new token
-    res.cookie("authToken", token, {
+    // await user.save(); // Save the user with the new token
+    req.session.userId =user._id
+    res.cookie(`authToken-${user._id}`, {token,userId:user._id}, {
         httpOnly: true, // Secure cookie, inaccessible to JavaScript
         sameSite: "Lax", // Restrict cookie sharing for cross-site requests
         maxAge: 24 * 60 * 60 * 1000, // Expiry time (optional)
     });
+    res.cookie(`User-${user._id}`, {userId:user._id}, {
+        httpOnly: true, // Secure cookie, inaccessible to JavaScript
+        sameSite: "Lax", // Restrict cookie sharing for cross-site requests
+        maxAge: 24 * 60 * 60 * 1000, // Expiry time (optional)
+    });
+    Id=user._id;
     res.status(StatusCodes.OK).json({ message: "Login successful!", user,token,userId: user._id});
 };
 
 
-
-
 //Dashboard route
-//THis is for the jwt verification process
+//This is for the jwt verification process
 // Add a route to fetch user details after login
 const dashboard = async (req, res) => {
-    // //We get the token from the headers of there request
-    // // console.log(req.headers.authorization);
-    // const token = req.headers.authorization?.split(" ")[1];
-
-
-    // //We check if there is a token
-    // if (!token) return res.status(401).json({ error: "No token provided" });
-
-    // try {
-    //     //When verifying always the first parameter is the token and the second parameter is the secret key
-    //     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    //     // console.log(decoded);
         const user = await User.findById(req.user.userId).select('-password');//Select will omit that parameter
         if(!user){
             throw new  BadRequestError('Invalid token provided');
         }
-        console.log(req.user);
         const token = req.user.token;
         res.status(StatusCodes.OK).json({user,token});
-    // } catch (error) {
-    //     res.status(401).json({ error: "Invalid or expired token" });
-    // }
 };
+
+const userId =async(req,res) =>{
+    const {userId,userTok} = req.body;
+    let user= req.cookies[`User-${userId}`]?await User.findById(req.cookies[`User-${userId}`].userId ):undefined;
+    // console.log(user);
+    let cookie;
+    if(user){
+        cookie =req.cookies[`authToken-${user._id}`];
+    }else{
+        cookie =req.cookies[`authToken-${userId}`]
+    }
+    console.log(req.cookies[`User-${userId}`])
+    res.status(StatusCodes.OK).json({message:'Successful',user:user,cookie:cookie,userTok});
+}
 
 
 //Export the controllers
 module.exports={
         signUp,
         login,
-        dashboard
+        dashboard,
+        userId,
 };

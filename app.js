@@ -32,6 +32,8 @@ const fileUpload = require('express-fileupload');
 const rateLimiter = require('express-rate-limit');
 const xss = require('xss-clean');
 const mongoSanitize = require('express-mongo-sanitize');
+const session = require("express-session");
+
 
 
 
@@ -53,6 +55,11 @@ const fs = require('fs');
 
 //Middleware
 app.use(cors({credentials: true}));//This allows connections from other ports
+app.use(session({
+    secret: process.env.SESSION_KEY,
+    resave: true,
+    saveUninitialized: true,
+}));
 app.use(morgan('tiny'));
 app.use(express.static('./public'))
 

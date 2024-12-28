@@ -7,7 +7,8 @@ const authMiddleware = require("../middleware/auth.js");
 const {
     signUp,
     login,
-    dashboard
+    dashboard,
+    userId,
 } = require('../controllers/auth.js');
 
 
@@ -17,5 +18,6 @@ const {
 router.route("/signup").post(signUp)
 router.route("/login").post(login);
 router.route("/dashboard").get(authMiddleware,dashboard);
+router.route("/userId").post(userId);
 
 module.exports = router;

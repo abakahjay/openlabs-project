@@ -1,19 +1,27 @@
-// import Cookies from "../js-cookie-main/index.js";
-
-
+// import Cookie from '../../node_modules/js-cookie';
 document.addEventListener("DOMContentLoaded", async () => {
-    // const token = Cookies.get("authToken");
-    // console.log("Token from Cookie:", token);
-    // const userId = localStorage.getItem("userId")//||localStorage.getItem(`userId-${data.user._id}`);
-    let token = localStorage.getItem(`token-${userId}`);
-    let hmm;
-    console.log(token);
-    console.log(userId);
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId =urlParams.get("id")|| localStorage.getItem("userId") || sessionStorage.getItem("userId");
+    const userTok =urlParams.get("oven")
+    // console.log(userId);
+    
+    const response = await fetch("/api/v1/auth/userId", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId,userTok}),
+    });
 
-    // if (!token) {
-    //     window.location.href = "../login/login.html"; // Redirect if not logged in
-    //     return;
-    // }
+    let datas = await response.json();
+    // console.log(datas);
+    
+    let token = datas.cookie?datas.cookie.token : datas.userTok;
+    // console.log(token);
+    // console.log(userId);
+    if (!token) {
+        window.location.href = "../login/login.html"; // Redirect if not logged in
+        return;
+    }
+    
 
     // Fetch user details
     await fetch('/api/v1/auth/dashboard', {
@@ -25,7 +33,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 alert(data.error);
                 window.location.href = "../login/login.html";
             } else {
-                console.log(data.user)
+                // console.log(data.user)
                 // Display user details
                 //It is advisable not to add the password to the user details
                 const { username, email, profile_picture} = data.user;
@@ -45,12 +53,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         })
         .catch(() => alert("Failed to load user details."));
-    // localStorage.removeItem("userId");
+        // localStorage.removeItem(`token-${userId}`);
+        // localStorage.removeItem("userId");
 
     // Logout
     document.getElementById("logout").addEventListener("click", () => {
         localStorage.removeItem(`token-${userId}`);
         localStorage.removeItem("userId");
+        localStorage.removeItem(`datas-${userId}`);
         window.location.href = "../login/login.html";
     });
 

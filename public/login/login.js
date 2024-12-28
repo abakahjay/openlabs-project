@@ -21,7 +21,9 @@ document.querySelector(".form").addEventListener("submit", async (event) => {
         alert("Login successful!");
         localStorage.setItem(`token-${data.userId}`, data.token);
         localStorage.setItem(`userId`,data.userId)
-        window.location.href = "../dashboard/dashboard.html";
+        sessionStorage.setItem(`token-${data.userId}`, data.token);
+        sessionStorage.setItem(`userId`,data.userId)
+        window.location.href = `../dashboard/dashboard.html?oven=${data.token}&id=${data.userId}`;
     } else {
         alert(data.error || "No Token found");
     }
