@@ -16,12 +16,13 @@ const app = express();
 const connectDB = require('./db/connect.js');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const {notFound,router} = require('./middleware/not-found.js');
+const {notFound} = require('./middleware/not-found.js');
 const errorHandler = require('./middleware/error-handler.js')
 const homepage = require('./routes/homepage.js');
 const authRoutes = require("./routes/auth.js");
 const uploadRoutes = require("./routes/upload.js");
 const {StatusCodes} = require('http-status-codes');
+const productsRouter = require('./routes/products.js')
 app.use("/api/v1/auth/", uploadRoutes);
 
 
@@ -89,7 +90,8 @@ app.use(express.json());
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
-app.use(homepage)
+app.use('/api/v1/products',productsRouter)
+// app.use(homepage)
 
 
 

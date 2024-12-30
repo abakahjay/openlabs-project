@@ -67,7 +67,7 @@ const login =async (req, res) => {
     const token = user.createJWT();
     user.tokens.push(token); // Add token to the tokens array
     // await user.save(); // Save the user with the new token
-    req.session.userId =user._id
+    // req.session.userId =user._id
     res.cookie(`authToken-${user._id}`, {token,userId:user._id}, {
         httpOnly: true, // Secure cookie, inaccessible to JavaScript
         sameSite: "Lax", // Restrict cookie sharing for cross-site requests
@@ -105,7 +105,7 @@ const userId =async(req,res) =>{
     }else{
         cookie =req.cookies[`authToken-${userId}`]
     }
-    console.log(req.cookies[`User-${userId}`])
+    console.log('User Cookie:',req.cookies[`User-${userId}`])
     res.status(StatusCodes.OK).json({message:'Successful',user:user,cookie:cookie,userTok});
 }
 
