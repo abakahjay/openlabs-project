@@ -1,5 +1,8 @@
 //We imported the module here
 const Product = require('../models/Products.js')
+const {StatusCodes}=require('http-status-codes')
+const {BadRequestError,NotFoundError}= require('../errors');
+
 
 
 
@@ -12,7 +15,7 @@ const getAllProductsStatic =async (req,res) =>{
         // name:{$regex:search, $options:'i'}//The i simply means case insensitive
         price:{$gt:30}
     }).sort('price').select('name price').limit(10)
-    res.status(200).json({msg:'Products Static Route',nbHits: products.length , products})
+    res.status(StatusCodes.OK).json({msg:'Products Static Route',nbHits: products.length , products})
 };
 
 
@@ -20,6 +23,7 @@ const getAllProductsStatic =async (req,res) =>{
 
 //We will set up the real functionality over here
 const getAllProducts = async (req,res,next) =>{
+    console.log(req.body)
     //We do this to control the kind of request a user can make with queries
     const {featured, company, name, sort, fields, numericFilters}= req.query;//Always destructure
 
@@ -93,8 +97,70 @@ const getAllProducts = async (req,res,next) =>{
 
     console.log(queryObject);
     const products = await  result;
-    res.status(200).json({msg:'Products Route',nbHits: products.length , products: products})
+    res.status(StatusCodes.OK).json({msg:'Products Route',nbHits: products.length , products: products})
 };
+
+
+
+
+const getProduct = async(req,res)=>{
+    //Next level destructuring
+    const {user :{userId},
+            params:{id:productId}//We assigned the first parameter of the params object to a new called jobId
+    }=req;
+    // console.log(jobId);
+    // console.log(userId);
+    console.log(req.user);
+    const product = await Product.findOne({_id:jobId,createdBy:userId})
+    if (!job) {
+        throw new NotFoundError(`No job with id ${jobId}`)
+    }
+    res.status(StatusCodes.OK).json({msg:'Product Found',nbHits:1,user:req.user,product})
+}
+const createProduct = async(req,res)=>{
+    console.log(req.user);
+    //We assign the createdBy to the user
+    req.body.createdBy=req.user.userId;
+    const {name,image,priceCents,createdBy,keywords} = req.body;
+    
+    const newProduct = await Product.create({name,priceCents,createdBy,image,keywords})
+    res.status(StatusCodes.CREATED).json({msg:'Job Created',user:req.user,newProduct})
+}
+const deleteProduct = async(req,res)=>{
+    console.log(req.user);
+    //Next level destructuring
+    const {user :{userId},
+            params:{id:productId}//We assigned the first parameter of the params object to a new called jobId
+    }=req;
+    // console.log(jobId);
+    // console.log(userId);
+    const product = await Product.findByIdAndRemove({_id:productId,createdBy:userId})
+
+    if (!product) {
+        throw new NotFoundError(`No job with id ${productId}`)
+    }
+    res.status(StatusCodes.OK).json({msg:'Job Deleted',user:req.user})
+}
+const updateProduct = async(req,res)=>{
+
+    //Next level destructuring
+    const {
+        body: { name, image ,priceCents},
+        user :{userId},
+            params:{id:productId}//We assigned the first parameter of the params object to a new called jobId
+    }=req;
+    if (name === '' || image === '' ||priceCents==='') {
+        throw new BadRequestError('Name, PriceCents or Image fields cannot be empty')
+    }
+    // console.log(userId);
+    console.log(req.user);
+    const product = await Product.findByIdAndUpdate({_id:productId,createdBy:userId},{ name, image },{ new: true, runValidators: true })
+    if (!product) {
+        throw new NotFoundError(`No product with id ${productId}`)
+    }
+    res.status(StatusCodes.OK).json({msg:'Product updated',user:req.user,product})
+}
+
 
 
 
@@ -102,4 +168,5 @@ const getAllProducts = async (req,res,next) =>{
 module.exports = {
     getAllProducts,
     getAllProductsStatic,
+    createProduct,deleteProduct,updateProduct,getProduct
 };

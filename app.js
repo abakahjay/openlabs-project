@@ -91,7 +91,7 @@ app.use(express.json());
 // Routes
 app.use("/api/v1/auth", authRoutes);
 app.use('/api/v1/products',productsRouter)
-// app.use(homepage)
+app.use(homepage)
 
 
 

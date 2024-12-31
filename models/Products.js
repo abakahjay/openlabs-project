@@ -10,10 +10,11 @@ const ProductSchema = new mongoose.Schema({
     },
     rating: {
         type: Object,
-        stars: {type:Number},
-        count: {type:Number}
+        stars: {type:Number,default:4.0},
+        count: {type:Number,default:50}
     },
     priceCents: {
+        required: [true, 'Please Enter your product price'],
         type: Number
     },
     keywords: [{
@@ -24,8 +25,15 @@ const ProductSchema = new mongoose.Schema({
     },
     sizeChartLink: {
         type: String
-    }
-})
+    },
+    instructions: {type: String},
+    warranty: {type: String},
+    createdBy: {
+        type: mongoose.Types.ObjectId,
+        ref: 'User',
+    },
+},
+{ timestamps: true })//An extra Schema parameter for timestamps(important)
 
 
 
