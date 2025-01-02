@@ -1,0 +1,21 @@
+[
+    {
+        "orderTime": "December 31",
+        "orderId": "a4b-6773d15c678876b6710d2d28-1a24w-1as14",
+        "totalCostCents": "35.04",
+        "products": [
+            {
+                "productId": "6773d15c678876b6710d2d29",
+                "quantity": 1,
+                "deliveryOptionId": "1",
+                "estimatedDeliveryTime": "January 7"
+            },
+            {
+                "productId": "6773d15c678876b6710d2d28",
+                "quantity": 1,
+                "deliveryOptionId": "1",
+                "estimatedDeliveryTime": "January 7"
+            }
+        ]
+    }
+]

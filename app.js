@@ -23,6 +23,8 @@ const authRoutes = require("./routes/auth.js");
 const uploadRoutes = require("./routes/upload.js");
 const {StatusCodes} = require('http-status-codes');
 const productsRouter = require('./routes/products.js')
+const cartRouter = require('./routes/cart.js')
+const ordersRouter = require('./routes/orders.js')
 app.use("/api/v1/auth/", uploadRoutes);
 
 
@@ -91,6 +93,8 @@ app.use(express.json());
 // Routes
 app.use("/api/v1/auth", authRoutes);
 app.use('/api/v1/products',productsRouter)
+app.use('/api/v1/cart',cartRouter)
+app.use('/api/v1/orders',ordersRouter)
 app.use(homepage)
 
 
