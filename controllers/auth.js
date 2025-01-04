@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require("../models/User");
-const Cookie = require('js-cookie');
+// const Cookie = require('js-cookie');
 const {UnauthenticatedError,BadRequestError}= require('../errors')
 const {StatusCodes}=require('http-status-codes')
 let Id;
