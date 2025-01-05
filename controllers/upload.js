@@ -41,7 +41,7 @@ const uploadProfilePic = async (req, res) => {
     console.log('Starting update process');
     if (!req.file) {
         console.warn('Cannot Find File')
-        return res.status(400).json({ success: false, error: 'No file uploaded.' });
+        return res.status(StatusCodes.BAD_REQUEST).json({ success: false, error: 'No file uploaded.' });
     }
     console.log('File has been found');
     const profilePicUrl = `../uploads/${req.file.filename}`;  // Generate URL for uploaded image

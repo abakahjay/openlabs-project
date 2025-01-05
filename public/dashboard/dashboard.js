@@ -105,4 +105,48 @@ document.addEventListener("DOMContentLoaded", async () => {
                 document.getElementById("upload-status").innerText ="Error uploading image.";
             });
     });
+
+
+
+
+    document.getElementById("upload-btns").addEventListener("click", async () => {
+        //Common syntax for the file input level
+        const fileInput = document.getElementById("file-inputs");
+        const file = fileInput.files[0];
+
+
+
+        // const imageFile = e.target.files[0];
+
+        if (!file) {
+            document.getElementById("upload-statuss").innerText = "Please select an image to upload.";
+            return;
+        }
+
+        const formDatas = new FormData();
+        formDatas.append("profile_pictures", file);
+        console.log(formDatas.get("profile_pictures"));
+
+        // Upload the image
+        await fetch("/api/v1/testing1/upload-profile-pic", {
+            method: "PATCH",
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            body: formDatas,
+            })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data);
+                if (data.success) {
+                    document.getElementById("upload-statuss").innerText = "Profile picture uploaded successfully.";
+                    document.getElementById("profile-pic").src = data.profile_picture;
+                } else {
+                    document.getElementById("upload-statuss").innerText = data.error || "Failed to upload image.";
+                }
+            })
+            .catch((err) => {
+                document.getElementById("upload-statuss").innerText ="Error uploading image.";
+            });
+    });
 });

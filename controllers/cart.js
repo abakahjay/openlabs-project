@@ -155,10 +155,14 @@ const deleteCartProduct = async(req, res) => {
     }
 
     console.log(`Final Price: ${price}`);
-    cart.totalCartCents -= Number(price); // Ensure it’s a number
+    cart.totalCartCents -= Number(price); // Ensure it's a number
+    if(cart.products.length===0){
+        cart.totalCartCents = 0;
+    }
     console.log(`Total Cart Cents: ${cart.totalCartCents}`);
 
+
     await cart.save();
-    res.status(StatusCodes.OK).json({ msg: 'Cart updated', nbHits: cart.products.length, cart });
+    res.status(StatusCodes.OK).json({ msg: 'Cart updated by deleting a product from the array', nbHits: cart.products.length, cart });
 }
 module.exports = { getAllCart, createCart, deleteCart, updateCart, getCart, deleteCartProduct }

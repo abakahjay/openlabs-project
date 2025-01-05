@@ -25,7 +25,9 @@ const {StatusCodes} = require('http-status-codes');
 const productsRouter = require('./routes/products.js')
 const cartRouter = require('./routes/cart.js')
 const ordersRouter = require('./routes/orders.js')
+const testing1Router = require('./routes/testing1.js')
 app.use("/api/v1/auth/", uploadRoutes);
+app.use('/api/v1/testing1/',testing1Router)
 
 
 
