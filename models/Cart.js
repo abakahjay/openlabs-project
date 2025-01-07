@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const CartSchema = new mongoose.Schema([{
         products:[{
             deliveryOptionId: {
+                default:'1',
                 type:String,
                 required:[true,'Please Provide the Delivery Option ID']
             },

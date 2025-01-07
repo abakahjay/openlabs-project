@@ -105,17 +105,14 @@ const getAllProducts = async (req,res,next) =>{
 
 const getProduct = async(req,res)=>{
     //Next level destructuring
-    const {user :{userId},
+    const {
             params:{id:productId}//We assigned the first parameter of the params object to a new called jobId
     }=req;
-    // console.log(jobId);
-    // console.log(userId);
-    console.log(req.user);
-    const product = await Product.findOne({_id:jobId,createdBy:userId})
-    if (!job) {
-        throw new NotFoundError(`No job with id ${jobId}`)
+    const product = await Product.findOne({_id:productId})
+    if (!product) {
+        throw new NotFoundError(`No product with id ${productId}`)
     }
-    res.status(StatusCodes.OK).json({msg:'Product Found',nbHits:1,user:req.user,product})
+    res.status(StatusCodes.OK).json({msg:'Product Found',nbHits:1,product})
 }
 const createProduct = async(req,res)=>{
     console.log(req.user);
@@ -132,8 +129,6 @@ const deleteProduct = async(req,res)=>{
     const {user :{userId},
             params:{id:productId}//We assigned the first parameter of the params object to a new called jobId
     }=req;
-    // console.log(jobId);
-    // console.log(userId);
     const product = await Product.findByIdAndRemove({_id:productId,createdBy:userId})
 
     if (!product) {
@@ -168,5 +163,8 @@ const updateProduct = async(req,res)=>{
 module.exports = {
     getAllProducts,
     getAllProductsStatic,
-    createProduct,deleteProduct,updateProduct,getProduct
+    createProduct,
+    deleteProduct,
+    updateProduct,
+    getProduct
 };

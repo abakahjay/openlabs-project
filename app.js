@@ -26,6 +26,8 @@ const productsRouter = require('./routes/products.js')
 const cartRouter = require('./routes/cart.js')
 const ordersRouter = require('./routes/orders.js')
 const testing1Router = require('./routes/testing1.js')
+const deliveryRouter = require('./routes/delivery.js')
+const changeDelRouter = require('./routes/cart2.js')
 app.use("/api/v1/auth/", uploadRoutes);
 app.use('/api/v1/testing1/',testing1Router)
 
@@ -75,7 +77,7 @@ app.use(helmet());
 //Other middleware
 const apiLimiter =rateLimiter({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
+    max: 100000, // limit each IP to 100 requests per windowMs
 })
 app.use("/api/", apiLimiter);
 
@@ -97,6 +99,8 @@ app.use("/api/v1/auth", authRoutes);
 app.use('/api/v1/products',productsRouter)
 app.use('/api/v1/cart',cartRouter)
 app.use('/api/v1/orders',ordersRouter)
+app.use('/api/v1/delivery',deliveryRouter)
+app.use('/api/v1/changedel',changeDelRouter)
 app.use(homepage)
 
 
