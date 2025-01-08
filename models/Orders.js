@@ -1,7 +1,5 @@
 const mongoose = require('mongoose')
-const OrderSchema = new mongoose.Schema({
-
-    a:{
+const OrderSchema = new mongoose.Schema([{
         orderTime: {
             type:String,
             required:[true,'Please Provide the Date Ordered']
@@ -14,10 +12,10 @@ const OrderSchema = new mongoose.Schema({
                     ref: 'Products',
                     required: [true, 'Please Provide a Product ID']
                 },
-                    quantity: {
+                quantity: {
                     type: Number, required: [true, 'Please Provide the Product Quantity']
                 },
-                    deliveryOptionId: {
+                deliveryOptionId: {
                     type: String,
                     required: [true, 'Please Provide the Delivery Option ID']
                 },
@@ -26,16 +24,13 @@ const OrderSchema = new mongoose.Schema({
                     required: [true, 'Please Provide the estimated delivery time']
                 }
             }
-        ]
-    },
-    createdBy: {
-    type: mongoose.Types.ObjectId,
-    ref: 'User',
-},
-},
-{ timestamps: true })//An extra Schema parameter for timestamps(important)
-
-
+        ],
+    
+        createdBy: {
+        type: mongoose.Types.ObjectId,
+        ref: 'User',
+        }
+}],{ timestamps: true })//An extra Schema parameter for timestamps(important)
 
 const Orders = mongoose.model("Orders", OrderSchema);
 module.exports = Orders;
