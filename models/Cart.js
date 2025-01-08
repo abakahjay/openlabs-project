@@ -22,6 +22,9 @@ const CartSchema = new mongoose.Schema([{
         totalCartCents: {
             type:Number, required:[true,'Please Provide Cart Total Cost in Cents'],
         },
+        totalDeliveryCents: {
+            type:Number, required:[true,'Please Provide Cart Total Delivery in Cents'],
+        },
         createdBy: {
             type: mongoose.Types.ObjectId,
             ref: 'User',

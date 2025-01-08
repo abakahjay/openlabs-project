@@ -2,6 +2,7 @@ const { UnauthenticatedError, BadRequestError, NotFoundError } = require('../err
 const { StatusCodes } = require('http-status-codes')
 const Cart = require('../models/Cart')
 const Products = require('../models/Products')
+const Delivery = require('../models/Delivery')
 const dayJs = require('dayJs')
 
 
@@ -34,8 +35,10 @@ const getCart = async (req, res) => {
 //!To create a cart
 const createCart = async (req, res) => {
     req.body[0].totalCartCents = 5;
-    let [{ products, totalCartCents }] = req.body;
+    req.body[0].totalDeliveryCents = 5;
+    let [{ products, totalCartCents,totalDeliveryCents }] = req.body;
     let price = 0; // Accumulator Variable
+    let delivery = 0; // Accumulator Variable
 
     // Use for...of loop instead of forEach for async handling
     for (const product of products) {
@@ -46,14 +49,25 @@ const createCart = async (req, res) => {
         } else {
             console.error(`Product with ID ${product.productId} not found.`);
         }
+    } for (const product of products) {
+        const main = await Delivery.findOne({deliveryOptionId:product.deliveryOptionId});
+        if (main) {
+            delivery += main.priceCents * 1;
+            console.log(delivery);
+        } else {
+            console.error(`Delivery with ID ${product.deliveryOptionId} not found.`);
+        }
     }
 
     console.log(`Final Price: ${price}`);
+    console.log(`Final delivery: ${delivery}`);
     totalCartCents = Number(price); // Ensure it’s a number
+    totalDeliveryCents = Number(delivery); // Ensure it’s a number
     console.log(`Total Cart Cents: ${totalCartCents}`);
+    console.log(`Total Delivery Cents: ${totalDeliveryCents}`);
 
     // Create new cart with updated totalCartCents
-    const newCart = await Cart.create([{ products, totalCartCents }]);
+    const newCart = await Cart.create([{ products, totalCartCents,totalDeliveryCents }]);
     res.status(StatusCodes.CREATED).json({ msg: 'Cart Created', newCart });
 };
 
@@ -102,15 +116,19 @@ const updateCart = async (req, res) => {
             if (newProId === newProductId) {
                 isThere = true;
                 carProduct.quantity += product.quantity;
+            }else if(newProId !== newProductId){
+                // isThere = false;
             }
         })
         if (!isThere) {
             cart.products.unshift(product);
+            // isThere=true;
         }
     });
 
 
     let price = 0; // Accumulator Variable
+    let delivery = 0; // Accumulator Variable
 
     // Use for...of loop instead of forEach for async handling
     for (const product of cart.products) {
@@ -122,16 +140,26 @@ const updateCart = async (req, res) => {
             console.error(`Product with ID ${product.productId} not found.`);
         }
     }
-
-
+    for (const product of cart.products) {
+        const main = await Delivery.findOne({deliveryOptionId:product.deliveryOptionId});
+        if (main) {
+            delivery += main.priceCents * 1;
+            console.log(delivery);
+        } else {
+            console.error(`Delivery with ID ${product.deliveryOptionId} not found.`);
+        }
+    }
 
     console.log(`Final Price: ${price}`);
-    cart.totalCartCents = Number(price); // Ensure it's a number
-    if (cart.products.length === 0) {
+    console.log(`Final delivery: ${delivery}`);
+    cart.totalCartCents = Number(price); // Ensure it’s a number
+    cart.totalDeliveryCents = Number(delivery); // Ensure it’s a number
+    if(cart.products.length ===0){
         cart.totalCartCents = 0;
+        cart.totalDeliveryCents = 0;
     }
     console.log(`Total Cart Cents: ${cart.totalCartCents}`);
-
+    console.log(`Total Delivery Cents: ${cart.totalDeliveryCents}`);
 
 
     cart.save();//This saves everything we have done to the data base
@@ -175,6 +203,7 @@ const deleteCartProduct = async (req, res) => {
     })
 
     let price = 0; // Accumulator Variable
+    let delivery = 0; // Accumulator Variable
 
     // Use for...of loop instead of forEach for async handling
     for (const product of cart.products) {
@@ -186,14 +215,26 @@ const deleteCartProduct = async (req, res) => {
             console.error(`Product with ID ${product.productId} not found.`);
         }
     }
+    for (const product of cart.products) {
+        const main = await Delivery.findOne({deliveryOptionId:product.deliveryOptionId});
+        if (main) {
+            delivery += main.priceCents * 1;
+            console.log(delivery);
+        } else {
+            console.error(`Delivery with ID ${product.deliveryOptionId} not found.`);
+        }
+    }
 
-    //Loggings of Information
     console.log(`Final Price: ${price}`);
-    cart.totalCartCents = Number(price); // Ensure it's a number
-    if (cart.products.length === 0) {
+    console.log(`Final delivery: ${delivery}`);
+    cart.totalCartCents = Number(price); // Ensure it’s a number
+    cart.totalDeliveryCents = Number(delivery); // Ensure it’s a number
+    if(cart.products.length ===0){
         cart.totalCartCents = 0;
+        cart.totalDeliveryCents = 0;
     }
     console.log(`Total Cart Cents: ${cart.totalCartCents}`);
+    console.log(`Total Delivery Cents: ${cart.totalDeliveryCents}`);
 
 
     await cart.save();
@@ -243,6 +284,7 @@ const changeCartQuantity = async (req, res) => {
         }
     })
     let price = 0; // Accumulator Variable
+    let delivery = 0; // Accumulator Variable
 
     // Use for...of loop instead of forEach for async handling
     for (const product of cart.products) {
@@ -254,15 +296,26 @@ const changeCartQuantity = async (req, res) => {
             console.error(`Product with ID ${product.productId} not found.`);
         }
     }
-
-
+    for (const product of cart.products) {
+        const main = await Delivery.findOne({deliveryOptionId:product.deliveryOptionId});
+        if (main) {
+            delivery += main.priceCents * 1;
+            console.log(delivery);
+        } else {
+            console.error(`Delivery with ID ${product.deliveryOptionId} not found.`);
+        }
+    }
 
     console.log(`Final Price: ${price}`);
-    cart.totalCartCents = Number(price); // Ensure it's a number
-    if (cart.products.length === 0) {
+    console.log(`Final delivery: ${delivery}`);
+    cart.totalCartCents = Number(price); // Ensure it’s a number
+    cart.totalDeliveryCents = Number(delivery); // Ensure it’s a number
+    if(cart.products.length ===0){
         cart.totalCartCents = 0;
+        cart.totalDeliveryCents = 0;
     }
     console.log(`Total Cart Cents: ${cart.totalCartCents}`);
+    console.log(`Total Delivery Cents: ${cart.totalDeliveryCents}`);
 
 
     await cart.save();
@@ -303,6 +356,40 @@ const changeDelivery = async (req, res) => {
             throw new NotFoundError(`There is no product with with ${productId}`)
         }
     })
+    let price = 0; // Accumulator Variable
+    let delivery = 0; // Accumulator Variable
+
+    // Use for...of loop instead of forEach for async handling
+    for (const product of cart.products) {
+        const main = await Products.findById(product.productId);
+        if (main) {
+            price += main.priceCents * product.quantity;
+            console.log(price);
+        } else {
+            console.error(`Product with ID ${product.productId} not found.`);
+        }
+    }
+    for (const product of cart.products) {
+        const main = await Delivery.findOne({deliveryOptionId:product.deliveryOptionId});
+        if (main) {
+            delivery += main.priceCents * 1;
+            console.log(delivery);
+        } else {
+            console.error(`Delivery with ID ${product.deliveryOptionId} not found.`);
+        }
+    }
+
+    console.log(`Final Price: ${price}`);
+    console.log(`Final delivery: ${delivery}`);
+    cart.totalCartCents = Number(price); // Ensure it’s a number
+    cart.totalDeliveryCents = Number(delivery); // Ensure it’s a number
+    if(cart.products.length ===0){
+        cart.totalCartCents = 0;
+        cart.totalDeliveryCents = 0;
+    }
+    console.log(`Total Cart Cents: ${cart.totalCartCents}`);
+    console.log(`Total Delivery Cents: ${cart.totalDeliveryCents}`);
+
     await cart.save();
     res.status(StatusCodes.OK).json({ msg: 'Cart Updated by changing the delivery option and the date Ordered',cart })
 }

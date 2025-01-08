@@ -7,9 +7,6 @@ const appPath = __dirname;
 module.exports = {appPath};
 
 
-
-
-
 //This are all the files required to run this application
 const express = require('express');
 const app = express();
@@ -21,16 +18,20 @@ const errorHandler = require('./middleware/error-handler.js')
 const homepage = require('./routes/homepage.js');
 const authRoutes = require("./routes/auth.js");
 const uploadRoutes = require("./routes/upload.js");
-const {StatusCodes} = require('http-status-codes');
 const productsRouter = require('./routes/products.js')
 const cartRouter = require('./routes/cart.js')
 const ordersRouter = require('./routes/orders.js')
 const testing1Router = require('./routes/testing1.js')
 const deliveryRouter = require('./routes/delivery.js')
 const changeDelRouter = require('./routes/cart2.js')
-app.use("/api/v1/auth/", uploadRoutes);
-app.use('/api/v1/testing1/',testing1Router)
 
+
+// Serve the uploaded images from the /uploads folder in code
+app.use("/api/v1/auth/", uploadRoutes);
+
+
+// Serve the uploaded images from the /uploads folder in database
+app.use('/api/v1/testing1/',testing1Router)
 
 
 // rest of the packages
@@ -39,13 +40,9 @@ const fileUpload = require('express-fileupload');
 const rateLimiter = require('express-rate-limit');
 const xss = require('xss-clean');
 const mongoSanitize = require('express-mongo-sanitize');
-
-
-
-
-
-
 const cors = require("cors");
+
+
 //All this is for license for https secure
 const path = require('path');
 const bodyParser = require("body-parser");
@@ -55,7 +52,6 @@ const fs = require('fs');
 //     key: fs.readFileSync('./key.pem'), // Path to your private key
 //     cert: fs.readFileSync('./cert.pem') // Path to your certificate
 // };
-
 
 
 //Middleware
@@ -73,7 +69,6 @@ app.use(express.static('./public'))
 app.use(helmet());
 
 
-
 //Other middleware
 const apiLimiter =rateLimiter({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -81,12 +76,11 @@ const apiLimiter =rateLimiter({
 })
 app.use("/api/", apiLimiter);
 
+
 app.use(xss());
 app.use(mongoSanitize());
 app.use(cookieParser(process.env.JWT_SECRET));
 app.use(fileUpload());
-
-
 
 
 // Parse incoming JSON requests
@@ -104,30 +98,15 @@ app.use('/api/v1/changedel',changeDelRouter)
 app.use(homepage)
 
 
-
-
-
-// Serve the uploaded images from the /uploads folder
-
-
-
-
-
-
 // Basic error handling middleware
 app.use(notFound);
 app.use(errorHandler);
 
 
-
-
-
-
-
-
 //This app has a listening problem
 const port = process.env.PORT || 7004;
 //If there are  port problems :   npx kill-port 5500
+
 
 const start = async()=>{
     try {
