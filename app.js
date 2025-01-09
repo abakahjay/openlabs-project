@@ -88,7 +88,7 @@ app.use(express.urlencoded({ extended:false }));
 app.use(express.json());
 
 
-// Routes
+// Routes to API's
 app.use("/api/v1/auth", authRoutes);
 app.use('/api/v1/products',productsRouter)
 app.use('/api/v1/cart',cartRouter)
