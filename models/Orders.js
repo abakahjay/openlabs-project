@@ -4,7 +4,10 @@ const OrderSchema = new mongoose.Schema([{
             type:String,
             required:[true,'Please Provide the Date Ordered']
         },
-        totalCostCents: {type: String, required: [true, 'Please Provide the total costs']},
+        totalCostCents: {
+            type: Number,
+            required: [true, 'Please Provide the total costs']
+        },
         products: [
             {
                 productId: {
