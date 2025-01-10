@@ -10,6 +10,8 @@ const getAllOrders = async (req, res) => {
     const orders = await Orders.find({}).sort('-createdAt');//We want to get only the carts associated with the user
     res.status(StatusCodes.OK).json({ msg: 'Get all Orders', nbHits: orders.length, orders })
 }
+
+
 const getOrder = async (req, res) => {
     //Next level destructuring
     const {
@@ -21,6 +23,8 @@ const getOrder = async (req, res) => {
     }
     res.status(StatusCodes.OK).json({ msg: 'Order Found', nbHits: 1, order })
 }
+
+
 const createOrder = async (req, res) => {
     const [{orderTime,totalCostCents,products }] = req.body;
     // console.log(req.body);
@@ -68,6 +72,8 @@ const createOrder = async (req, res) => {
     const newOrder =presentOrder?presentOrder: await Orders.create([{ orderTime,totalCostCents,products }])
     res.status(StatusCodes.CREATED).json({ msg: 'Order Created', newOrder })
 }
+
+
 const deleteOrder = async (req, res) => {
     const {
         params: { id: ordersId }//We assigned the first parameter of the params object to a new called cartId
@@ -78,6 +84,8 @@ const deleteOrder = async (req, res) => {
     }
     res.status(StatusCodes.OK).json({ msg: 'Order Deleted' })
 }
+
+
 const updateOrder = async (req, res) => {
     //Next level destructuring
     const {
@@ -105,4 +113,6 @@ const updateOrder = async (req, res) => {
     });
     res.status(StatusCodes.OK).json({ msg: 'Order updated',nbHits: order.products.length , order });
 }
+
+
 module.exports = { getAllOrders, createOrder, deleteOrder, updateOrder, getOrder }
