@@ -9,8 +9,11 @@ module.exports = {appPath};
 
 //This are all the files required to run this application
 const express = require('express');
+const bodyParser = require("body-parser");
+const logger = require("morgan");
 const app = express();
 const connectDB = require('./db/connect.js');
+const mongoose= require('mongoose')
 const helmet = require('helmet');
 const morgan = require('morgan');
 const {notFound} = require('./middleware/not-found.js');
@@ -26,12 +29,16 @@ const deliveryRouter = require('./routes/delivery.js')
 const changeDelRouter = require('./routes/cart2.js')
 
 
+
+
+
 // Serve the uploaded images from the /uploads folder in code
 app.use("/api/v1/auth/", uploadRoutes);
 
-
+app.use(bodyParser.json());
+app.use(logger("dev"));
 // Serve the uploaded images from the /uploads folder in database
-app.use('/api/v1/testing1/',testing1Router)
+app.use('/api/v1/uploadFiles/',testing1Router)
 
 
 // rest of the packages
@@ -45,7 +52,6 @@ const cors = require("cors");
 
 //All this is for license for https secure
 const path = require('path');
-const bodyParser = require("body-parser");
 const https = require('https');
 const fs = require('fs');
 // const sslOptions = {
@@ -61,7 +67,7 @@ app.use(cors({credentials: true}));//This allows connections from other ports
 //     resave: true,
 //     saveUninitialized: true,
 // }));
-app.use(morgan('tiny'));
+// app.use(morgan('tiny'));
 app.use(express.static('./public'))
 
 
@@ -112,7 +118,10 @@ const start = async()=>{
     try {
         //Connect the Database
         //We must always include our connect database method in the server application
-        await  connectDB(process.env.MONGO_URI).then(() => console.log('Connected to MongoDB...'))
+        await  connectDB(process.env.MONGO_URI).then(() => {
+            console.log('Connected to MongoDB...')
+        })
+
         app.listen(port,console.log(`Server Listening on http://localhost:${port}`));
         // https.createServer(sslOptions, app).listen(port, () => {
         //     console.log(`Server running on https://localhost:${port}`);

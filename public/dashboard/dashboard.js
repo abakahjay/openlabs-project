@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log(formDatas.get("profile_pictures"));
 
         // Upload the image
-        await fetch("/api/v1/testing1/upload-profile-pic", {
+        await fetch("/api/v1/uploadFiles/upload-profile-pic", {
             method: "PATCH",
             headers: {
                 Authorization: `Bearer ${token}`

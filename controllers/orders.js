@@ -25,7 +25,7 @@ const getOrder = async (req, res) => {
 }
 
 
-const createOrder = async (req, res) => {
+const createOrders = async (req, res) => {
     const [{orderTime,totalCostCents,products }] = req.body;
     // console.log(req.body);
     
@@ -73,6 +73,53 @@ const createOrder = async (req, res) => {
     res.status(StatusCodes.CREATED).json({ msg: 'Order Created', newOrder })
 }
 
+const createOrder = async (req, res) => {
+    const [{ orderTime, totalCostCents, products }] = req.body;
+
+    // Process products to add estimated delivery times
+    for (const product of products) {
+        const main = await Delivery.findOne({ deliveryOptionId: product.deliveryOptionId });
+        if (main) {
+            product.estimatedDeliveryTime = today.add(main.deliveryDays, 'days').format('ddd, D MMMM YYYY');
+        } else {
+            console.error(`Delivery with ID ${product.deliveryOptionId} not found.`);
+        }
+    }
+
+    // Retrieve the existing order based on orderTime
+    let presentOrder = await Orders.findOne({ orderTime });
+
+    if (presentOrder) {
+        presentOrder.totalCostCents += totalCostCents;
+
+        // Loop through the new products and find the corresponding ones in the existing order
+        products.forEach((carProduct) => {
+            // Use find to check if the product already exists in the present order
+            const existingProduct = presentOrder.products.find(
+                (product) => product.productId.toString() === carProduct.productId.toString()
+            );
+
+            if (existingProduct) {
+                // If found, update the quantity
+                existingProduct.quantity += carProduct.quantity;
+            } else {
+                // If not found, add the new product to the order
+                presentOrder.products.unshift(carProduct);
+            }
+        });
+
+        // Save the updated order
+        await presentOrder.save();
+    } else {
+        // If no order matches, create a new one
+        presentOrder = await Orders.create([{ orderTime, totalCostCents, products }]);
+    }
+
+    // Respond with the created/updated order
+    res.status(StatusCodes.CREATED).json({ msg: 'Order Created', newOrder: presentOrder });
+};
+
+
 
 const deleteOrder = async (req, res) => {
     const {
@@ -115,4 +162,4 @@ const updateOrder = async (req, res) => {
 }
 
 
-module.exports = { getAllOrders, createOrder, deleteOrder, updateOrder, getOrder }
+module.exports = { getAllOrders, createOrder,createOrders, deleteOrder, updateOrder, getOrder }

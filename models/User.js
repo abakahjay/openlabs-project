@@ -41,6 +41,11 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: './placeholder.jpg'
     }, // Default profile picture
+    profile_picture_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "uploads", // Reference to the GridFS bucket
+        default: null // By default, no profile picture is associated
+    },
     tokens: [{ type: String }] // Array to store tokens
 });
 //We can can also pass functions(middleware) to our model here`using the schema;

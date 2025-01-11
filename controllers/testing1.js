@@ -1,72 +1,160 @@
-require('dotenv').config()
+require('dotenv').config();
 const mongoose = require('mongoose');
-const multer = require('multer');
-const { GridFsStorage } = require('multer-gridfs-storage');
-const crypto = require('crypto');
-const path = require('path');
-const {StatusCodes} = require('http-status-codes');
-const User= require('../models/User.js')
+const { StatusCodes } = require('http-status-codes');
+const User = require('../models/User.js');
+const archiver = require("archiver");
+const { Transform } = require("stream");
+const { ObjectId } = require("mongodb");
+const { UnauthenticatedError, BadRequestError, NotFoundError } = require('../errors')
 
 
 
-
-
-// MongoDB connection
-const conn = mongoose.connection;
-
-// Initialize GridFS Stream
-let gfs;
-conn.once('open', () => {
-    gfs = new mongoose.mongo.GridFSBucket(conn.db, { bucketName: 'uploads' });
-    console.log('GridFS Connected for testing');
-})
-
-
-// Set up storage engine
-const storage = new GridFsStorage({
-    url: process.env.MONGO_URI,
-    file: (req, file) => {
-        return new Promise((resolve, reject) => {
-            crypto.randomBytes(16, (err, buf) => {
-                if (err) return reject(err);
-                const filename = `${buf.toString('hex')}${path.extname(file.originalname)}`;
-                const fileInfo = {
-                    filename: filename,
-                    bucketName: 'uploads', // Should match bucketName in GridFSBucket
-                };
-                resolve(fileInfo);
-            });
+let bucket;
+(() => {
+    mongoose.connection.on("connected", () => {
+        bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+            bucketName: "uploads",
         });
-    },
-});
+        console.log('GridFS Connected for testing');
+    });
+})();
 
-const upload = multer({ storage });
 
+// Route handler for uploading profile picture
 const uploadProfilePic = async (req, res) => {
-    // console.log(req.file)
     console.log('Starting update process');
+
+    // Check if a file is uploaded
     if (!req.file) {
-        console.warn('Cannot Find File')
-        return res.status(StatusCodes.BAD_REQUEST).json({ success: false, error: 'No file uploaded.' });
+        console.warn('Cannot Find File');
+        throw new BadRequestError('No File Detected');
     }
     console.log('File has been found');
-    const profilePicUrl = `../uploads/${req.file.filename}`;  // Generate URL for uploaded image
 
-    try {
-        const userId = req.user.userId; // Use the authenticated user's ID from req.user
-        // Update the user's profile picture URL in the database
-        const user = await User.findByIdAndUpdate(userId, { profile_picture: profilePicUrl }, { new: true });
-        // console.log(user)
-        if (!user) {
-            return res.status(StatusCodes.NOT_FOUND).json({ success: false, error: 'User not found.' });
-        }
-        res.status(StatusCodes.OK).json({ success: true, profile_picture: user.profile_picture });  // Respond with the new profile picture URL
-    } catch (err) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ success: false, error: 'Failed to update profile picture.' });
+    // Generate URL for uploaded image (GridFS URL format)
+    const profilePicUrl = `/uploads/${req.file.filename}`;
+
+    // Assuming the user's ID is available in req.user (you may want to validate and check the user's authentication status)
+    const userId = req.user.userId;  // Example: req.user.userId from authentication middleware
+
+    // Update the user's profile picture URL in the database
+    const user = await User.findByIdAndUpdate(userId, { profile_picture: profilePicUrl }, { new: true });
+
+    // Handle case where user is not found
+    if (!user) {
+        throw new NotFoundError('User Not Found')
     }
+    // Return the new profile picture URL as a response
+    res.status(StatusCodes.OK).json({ success: true, profile_picture: user.profile_picture });
 };
 
+
+// Upload a single file
+const uploadSingleFile = async (req, res) => {
+    if (!req.file) {
+        console.warn('Cannot Find File');
+        throw new BadRequestError('No File Detected');
+    }
+    res.status(StatusCodes.CREATED).json({ text: "File uploaded successfully!", file: req.file });
+};
+
+
+// Upload multiple files
+const uploadMultipleFiles = async (req, res) => {
+    if (!req.file) {
+        console.warn('Cannot Find File');
+        throw new BadRequestError('No File Detected');
+    }
+    res.status(StatusCodes.CREATED).json({ text: "Files uploaded successfully!", files: req.files });
+};
+
+// Download a file by ID
+const downloadFileById = async (req, res) => {
+        const { fileId } = req.params;
+        const file = await bucket.find({ _id: new ObjectId(fileId) }).toArray();
+
+        if (file.length === 0) return res.status(404).json({ error: { text: "File not found" } });
+
+        res.set("Content-Type", file[0].contentType);
+        res.set("Content-Disposition", `attachment; filename=${file[0].filename}`);
+
+        bucket.openDownloadStream(new ObjectId(fileId)).pipe(res);
+};
+
+// Download files as ZIP
+const downloadFilesAsZip = async (req, res) => {
+        const files = await bucket.find().toArray();
+        if (files.length === 0) {
+            return res.status(404).json({ error: { text: "No files found" } });
+        }
+
+        res.set("Content-Type", "application/zip");
+        res.set("Content-Disposition", `attachment; filename=files.zip`);
+
+        const archive = archiver("zip", { zlib: { level: 9 } });
+        archive.pipe(res);
+
+        files.forEach((file) => {
+            const stream = bucket.openDownloadStream(file._id);
+            archive.append(stream, { name: file.filename });
+        });
+
+        archive.finalize();
+};
+
+// Download files as Base64
+const downloadFilesAsBase64 = async (req, res) => {
+        const files = await bucket.find().toArray();
+        const filesData = await Promise.all(
+            files.map(
+                (file) =>
+                    new Promise((resolve) => {
+                        const chunks = [];
+                        bucket.openDownloadStream(file._id).pipe(
+                            new Transform({
+                                transform(chunk, encoding, done) {
+                                    chunks.push(chunk);
+                                    done();
+                                },
+                                flush(done) {
+                                    const base64 = Buffer.concat(chunks).toString("base64");
+                                    resolve(base64);
+                                    done();
+                                },
+                            })
+                        );
+                    })
+            )
+        );
+        res.status(StatusCodes.OK).json(filesData);
+    
+};
+
+// Rename a file
+const renameFile = async (req, res) => {
+        const { fileId } = req.params;
+        const { filename } = req.body;
+
+        await bucket.rename(new ObjectId(fileId), filename);
+        res.status(200).json({ text: "File renamed successfully!" });
+};
+
+// Delete a file
+const deleteFile = async (req, res) => {
+    
+        const { fileId } = req.params;
+        await bucket.delete(new ObjectId(fileId));
+        res.status(StatusCodes.OK).json({ text: "File deleted successfully!" });
+};
+
+
 module.exports = {
-    upload,
-    uploadProfilePic
+    uploadProfilePic,
+    uploadSingleFile,
+    uploadMultipleFiles,
+    downloadFileById,
+    downloadFilesAsZip,
+    downloadFilesAsBase64,
+    renameFile,
+    deleteFile,
 };
