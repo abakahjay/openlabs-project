@@ -1,5 +1,25 @@
 // import Cookie from '../../node_modules/js-cookie';
 document.addEventListener("DOMContentLoaded", async () => {
+    // Regular Colors
+console.log('\x1b[31m%s\x1b[0m', 'This is red');       // Red text
+console.log('\x1b[32m%s\x1b[0m', 'This is green');     // Green text
+console.log('\x1b[33m%s\x1b[0m', 'This is yellow');    // Yellow text
+console.log('\x1b[34m%s\x1b[0m', 'This is blue');      // Blue text
+console.log('\x1b[35m%s\x1b[0m', 'This is magenta');   // Magenta text
+console.log('\x1b[36m%s\x1b[0m', 'This is cyan');      // Cyan text
+console.log('\x1b[37m%s\x1b[0m', 'This is white');     // White text
+
+// Background Colors
+console.log('\x1b[41m%s\x1b[0m', 'This has red background'); // Red background
+console.log('\x1b[42m%s\x1b[0m', 'This has green background'); // Green background
+
+// Bold and Underline
+console.log('\x1b[1m%s\x1b[0m', 'This is bold');        // Bold text
+console.log('\x1b[4m%s\x1b[0m', 'This is underlined');  // Underlined text
+
+// Reset Style
+console.log('\x1b[0m%s\x1b[0m', 'This is normal again'); // Reset style
+
     const urlParams = new URLSearchParams(window.location.search);
     const userId =urlParams.get("id")|| localStorage.getItem("userId") || sessionStorage.getItem("userId");
     const userTok =urlParams.get("oven")
