@@ -140,6 +140,7 @@ const verifyEmail = async (req, res) => {
             throw new NotFoundError(`No user with email:${decoded.email}`)
         }
         user.isVerified = true;
+        await user.save()
         res.send('Email verified successfully!');
 };
 
