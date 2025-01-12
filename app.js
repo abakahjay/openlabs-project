@@ -27,6 +27,8 @@ const ordersRouter = require('./routes/orders.js')
 const testing1Router = require('./routes/testing1.js')
 const deliveryRouter = require('./routes/delivery.js')
 const changeDelRouter = require('./routes/cart2.js')
+const messageRoutes = require('./routes/messageRoutes');
+const setupSocket = require('./utils/socket');
 
 
 
@@ -62,35 +64,16 @@ const fs = require('fs');
 
 //This is for the messaging
 const http = require('http');
-const socketIo = require('socket.io');
+// const socketIo = require('socket.io');
 const server = http.createServer(app);
-const io = socketIo(server);
-
-//Testing the Io
-// app.get('/socket.io', (req, res) => {
-//     res.send('Real-time messaging server');
-// });
-
-io.on('connection', (socket) => {
-    console.log('A user connected');
-
-    // Listen for incoming messages from clients
-    socket.on('sendMessage', (message) => {
-        console.log('Message received: ', message);
-        // Broadcast the message to all connected users
-        socket.broadcast.emit('receiveMessage', message);
-    });
-
-    // Handle disconnection
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-    });
+const io = require('socket.io')(server, {
+    cors: {
+        origin: '*', // Allow any origin for development
+        methods: ['GET', 'POST'],
+    },
 });
 
 
-// server.listen(7007, () => {
-//     console.log('IO server running on http://localhost:7007');
-// });
 
 
 
@@ -136,6 +119,11 @@ app.use('/api/v1/cart', cartRouter)
 app.use('/api/v1/orders', ordersRouter)
 app.use('/api/v1/delivery', deliveryRouter)
 app.use('/api/v1/changedel', changeDelRouter)
+app.use('/api/v1/messages', messageRoutes);
+
+// Setup Socket.IO
+setupSocket(io);
+
 app.use(homepage)
 
 
@@ -157,7 +145,7 @@ const start = async () => {
             console.log('Connected to MongoDB...')
         })
 
-        app.listen(port, console.log(`Server Listening on http://localhost:${port}`));
+        server.listen(port, console.log(`Server Listening on http://localhost:${port}`));
         // https.createServer(sslOptions, app).listen(port, () => {
         //     console.log(`Server running on https://localhost:${port}`);
         // });
