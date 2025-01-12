@@ -4,7 +4,7 @@ const User = require("../models/User");
 // const Cookie = require('js-cookie');
 const { UnauthenticatedError, BadRequestError,NotFoundError } = require('../errors')
 const { StatusCodes } = require('http-status-codes');
-const sendVerificationEmail = require('../utils/sendVerficationEmail');
+const sendVerificationEmail = require('../utils/sendVerficationEmail.js');
 let Id;
 
 // Generate a JWT
