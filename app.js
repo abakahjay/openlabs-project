@@ -4,7 +4,7 @@ require('express-async-errors');
 
 //This is just saving the path into a variable and exporting it to use elsewhere
 const appPath = __dirname;
-module.exports = {appPath};
+module.exports = { appPath };
 
 
 //This are all the files required to run this application
@@ -13,10 +13,10 @@ const bodyParser = require("body-parser");
 const logger = require("morgan");
 const app = express();
 const connectDB = require('./db/connect.js');
-const mongoose= require('mongoose')
+const mongoose = require('mongoose')
 const helmet = require('helmet');
 const morgan = require('morgan');
-const {notFound} = require('./middleware/not-found.js');
+const { notFound } = require('./middleware/not-found.js');
 const errorHandler = require('./middleware/error-handler.js')
 const homepage = require('./routes/homepage.js');
 const authRoutes = require("./routes/auth.js");
@@ -38,7 +38,7 @@ app.use("/api/v1/auth/", uploadRoutes);
 app.use(bodyParser.json());
 app.use(logger("dev"));
 // Serve the uploaded images from the /uploads folder in database
-app.use('/api/v1/uploadFiles/',testing1Router)
+app.use('/api/v1/uploadFiles/', testing1Router)
 
 
 // rest of the packages
@@ -60,8 +60,43 @@ const fs = require('fs');
 // };
 
 
+//This is for the messaging
+const http = require('http');
+const socketIo = require('socket.io');
+const server = http.createServer(app);
+const io = socketIo(server);
+
+//Testing the Io
+// app.get('/socket.io', (req, res) => {
+//     res.send('Real-time messaging server');
+// });
+
+io.on('connection', (socket) => {
+    console.log('A user connected');
+
+    // Listen for incoming messages from clients
+    socket.on('sendMessage', (message) => {
+        console.log('Message received: ', message);
+        // Broadcast the message to all connected users
+        socket.broadcast.emit('receiveMessage', message);
+    });
+
+    // Handle disconnection
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
+    });
+});
+
+
+// server.listen(7007, () => {
+//     console.log('IO server running on http://localhost:7007');
+// });
+
+
+
+
 //Middleware
-app.use(cors({credentials: true}));//This allows connections from other ports
+app.use(cors({ credentials: true }));//This allows connections from other ports
 // app.use(session({
 //     secret: process.env.SESSION_KEY,
 //     resave: true,
@@ -76,7 +111,7 @@ app.use(helmet());
 
 
 //Other middleware
-const apiLimiter =rateLimiter({
+const apiLimiter = rateLimiter({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100000, // limit each IP to 100 requests per windowMs
 })
@@ -90,17 +125,17 @@ app.use(fileUpload());
 
 
 // Parse incoming JSON requests
-app.use(express.urlencoded({ extended:false }));
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 
 // Routes to API's
 app.use("/api/v1/auth", authRoutes);
-app.use('/api/v1/products',productsRouter)
-app.use('/api/v1/cart',cartRouter)
-app.use('/api/v1/orders',ordersRouter)
-app.use('/api/v1/delivery',deliveryRouter)
-app.use('/api/v1/changedel',changeDelRouter)
+app.use('/api/v1/products', productsRouter)
+app.use('/api/v1/cart', cartRouter)
+app.use('/api/v1/orders', ordersRouter)
+app.use('/api/v1/delivery', deliveryRouter)
+app.use('/api/v1/changedel', changeDelRouter)
 app.use(homepage)
 
 
@@ -114,15 +149,15 @@ const port = process.env.PORT || 7004;
 //If there are  port problems :   npx kill-port 5500
 
 
-const start = async()=>{
+const start = async () => {
     try {
         //Connect the Database
         //We must always include our connect database method in the server application
-        await  connectDB(process.env.MONGO_URI).then(() => {
+        await connectDB(process.env.MONGO_URI).then(() => {
             console.log('Connected to MongoDB...')
         })
 
-        app.listen(port,console.log(`Server Listening on http://localhost:${port}`));
+        app.listen(port, console.log(`Server Listening on http://localhost:${port}`));
         // https.createServer(sslOptions, app).listen(port, () => {
         //     console.log(`Server running on https://localhost:${port}`);
         // });
