@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const { required } = require("joi");
 
 const UserSchema = new mongoose.Schema({
     firstName: {
@@ -36,6 +37,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please Enter your password'],
         minlength: 6
+    },
+    isVerified:{
+        type:Boolean,
+        required: [true,'Please Provide Verification Status']
     },
     profile_picture: {
         type: String,

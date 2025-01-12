@@ -1,8 +1,10 @@
+require('dotenv').config()
 const jwt = require('jsonwebtoken');
 const User = require("../models/User");
 // const Cookie = require('js-cookie');
-const {UnauthenticatedError,BadRequestError}= require('../errors')
-const {StatusCodes}=require('http-status-codes')
+const { UnauthenticatedError, BadRequestError,NotFoundError } = require('../errors')
+const { StatusCodes } = require('http-status-codes');
+const sendVerificationEmail = require('../utils/sendVerficationEmail');
 let Id;
 
 // Generate a JWT
@@ -22,37 +24,45 @@ const signUp = async (req, res) => {
 
 
     // Create a new user
-    const newUser =await User.create({ firstName, lastName, username, email, password });
-    const UserId =JSON.stringify(newUser._id);
+    const newUser = await User.create({ firstName, lastName, username, email, password, isVerified: false });
+
+    const UserId = JSON.stringify(newUser._id);
     console.log(UserId.split('"')[1]);
 
     const token = newUser.createJWT();
+    const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '30d' });
     newUser.tokens.push(token); // Add token to the tokens array
     // await newUser.save(); // Save the user with the new token
-    res.cookie(`authToken-${newUser._id}`, {token,userId:newUser._id}, {
+    sendVerificationEmail({
+        name: username,
+        email,
+        verificationToken,
+        origin: 'http://localhost:7004/',
+    })
+    res.cookie(`authToken-${newUser._id}`, { token, userId: newUser._id }, {
         httpOnly: true, // Secure cookie, inaccessible to JavaScript
         sameSite: "Lax", // Restrict cookie sharing for cross-site requests
         maxAge: 24 * 60 * 60 * 1000, // Expiry time (optional)
     });
-    res.cookie(`User`, {userId:newUser._id}, {
+    res.cookie(`User`, { userId: newUser._id }, {
         httpOnly: true, // Secure cookie, inaccessible to JavaScript
         sameSite: "Lax", // Restrict cookie sharing for cross-site requests
         maxAge: 24 * 60 * 60 * 1000, // Expiry time (optional)
     });
     req.session.userId = newUser._id;
-    res.status(StatusCodes.CREATED).json({ message: "User registered successfully!",token,userId: UserId.split('"')[1]});
+    res.status(StatusCodes.CREATED).json({ message: "User registered successfully!", token, userId: UserId.split('"')[1] });
 };
 
 // Login Route
-const login =async (req, res) => {
+const login = async (req, res) => {
     const { email, password } = req.body;
     console.log(req.body);
-    if(!email||!password){
+    if (!email || !password) {
         throw new BadRequestError('PLease Provide Email and Password')
     }
 
     // Find user by email
-    const user = await User.findOne({ email})//.select('-password');
+    const user = await User.findOne({ email })//.select('-password');
 
     if (!user) {
         throw new UnauthenticatedError("Invalid email.");
@@ -60,7 +70,7 @@ const login =async (req, res) => {
     //Check if password is correct
     const isPasswordCorrect = await user.comparePasswords(password)
     console.warn("Password Correct:", isPasswordCorrect);  // Log result of password check
-      //If not throw an error
+    //If not throw an error
     if (!isPasswordCorrect) {
         throw new UnauthenticatedError('Invalid Password');
     }
@@ -68,18 +78,18 @@ const login =async (req, res) => {
     user.tokens.push(token); // Add token to the tokens array
     // await user.save(); // Save the user with the new token
     // req.session.userId =user._id
-    res.cookie(`authToken-${user._id}`, {token,userId:user._id}, {
+    res.cookie(`authToken-${user._id}`, { token, userId: user._id }, {
         httpOnly: true, // Secure cookie, inaccessible to JavaScript
         sameSite: "Lax", // Restrict cookie sharing for cross-site requests
         maxAge: 24 * 60 * 60 * 1000, // Expiry time (optional)
     });
-    res.cookie(`User-${user._id}`, {userId:user._id}, {
+    res.cookie(`User-${user._id}`, { userId: user._id }, {
         httpOnly: true, // Secure cookie, inaccessible to JavaScript
         sameSite: "Lax", // Restrict cookie sharing for cross-site requests
         maxAge: 24 * 60 * 60 * 1000, // Expiry time (optional)
     });
-    Id=user._id;
-    res.status(StatusCodes.OK).json({ message: "Login successful!", user,token,userId: user._id});
+    Id = user._id;
+    res.status(StatusCodes.OK).json({ message: "Login successful!", user, token, userId: user._id });
 };
 
 
@@ -87,33 +97,58 @@ const login =async (req, res) => {
 //This is for the jwt verification process
 // Add a route to fetch user details after login
 const dashboard = async (req, res) => {
-        const user = await User.findById(req.user.userId).select('-password');//Select will omit that parameter
-        if(!user){
-            throw new  BadRequestError('Invalid token provided');
-        }
-        const token = req.user.token;
-        res.status(StatusCodes.OK).json({user,token});
+    const user = await User.findById(req.user.userId).select('-password');//Select will omit that parameter
+    if (!user) {
+        throw new BadRequestError('Invalid token provided');
+    }
+    const token = req.user.token;
+    res.status(StatusCodes.OK).json({ user, token });
 };
 
-const userId =async(req,res) =>{
-    const {userId,userTok} = req.body;
-    let user= req.cookies[`User-${userId}`]?await User.findById(req.cookies[`User-${userId}`].userId ):undefined;
+const userId = async (req, res) => {
+    const { userId, userTok } = req.body;
+    let user = req.cookies[`User-${userId}`] ? await User.findById(req.cookies[`User-${userId}`].userId) : undefined;
     // console.log(user);
     let cookie;
-    if(user){
-        cookie =req.cookies[`authToken-${user._id}`];
-    }else{
-        cookie =req.cookies[`authToken-${userId}`]
+    if (user) {
+        cookie = req.cookies[`authToken-${user._id}`];
+    } else {
+        cookie = req.cookies[`authToken-${userId}`]
     }
-    console.log('User Cookie:',req.cookies[`User-${userId}`])
-    res.status(StatusCodes.OK).json({message:'Successful',user:user,cookie:cookie,userTok});
+    console.log('User Cookie:', req.cookies[`User-${userId}`])
+    res.status(StatusCodes.OK).json({ message: 'Successful', user: user, cookie: cookie, userTok });
 }
 
 
+
+//Email Verification
+
+const verifyEmail = async (req, res) => {
+    const { token,email } = req.query;
+        if(!token){
+            throw new BadRequestError('No Token Provided')
+        }
+        // Verify the token
+        const decoded = jwt.verify(token,process.env.JWT_SECRET,);
+        if(!decoded){
+            throw new UnauthenticatedError('Email Was not Verified(Invalid Token)')
+        }
+
+        // Find the user and mark them as verified
+        const user =await  User.find(u => u.email === decoded.email);
+        if (!user) {
+            throw new NotFoundError(`No user with email:${decoded.email}`)
+        }
+        user.isVerified = true;
+        res.send('Email verified successfully!');
+};
+
+
 //Export the controllers
-module.exports={
-        signUp,
-        login,
-        dashboard,
-        userId,
+module.exports = {
+    signUp,
+    login,
+    dashboard,
+    userId,
+    verifyEmail
 };
