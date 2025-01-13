@@ -135,7 +135,7 @@ const verifyEmail = async (req, res) => {
         }
 
         // Find the user and mark them as verified
-        const user =await  User.find(u => u.email === decoded.email);
+        const user = await User.findOne({ email:decoded.email })
         if (!user) {
             throw new NotFoundError(`No user with email:${decoded.email}`)
         }
