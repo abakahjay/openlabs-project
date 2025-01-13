@@ -6,19 +6,19 @@ const { required } = require("joi");
 const UserSchema = new mongoose.Schema({
     firstName: {
         type: String,
-        required: [true, 'Please Enter your name'],
+        required: [true, 'Please Enter your first name'],
         maxlength: 50,
         minlength: 3
     },
     lastName: {
         type: String,
-        required: [true, 'Please Enter your name'],
+        required: [true, 'Please Enter your last name'],
         maxlength: 50,
         minlength: 3
     },
     username: {
         type: String,
-        required: [true, 'Please Enter your name'],
+        required: [true, 'Please Enter your username name'],
         maxlength: 50,
         minlength: 3,
         unique: true,
@@ -51,6 +51,30 @@ const UserSchema = new mongoose.Schema({
         ref: "uploads", // Reference to the GridFS bucket
         default: null // By default, no profile picture is associated
     },
+    bio: {
+        type:String
+    },
+    followers: [
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref: "uploads", // Reference to the GridFS bucket
+            default: null 
+        }
+    ],
+    following: [
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref: "User", // Reference to the GridFS bucket
+            default: null
+        }
+    ],
+    posts: [
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref: "User", // Reference to the GridFS bucket
+            default: null
+        }
+    ],
     tokens: [{ type: String }] // Array to store tokens
 });
 //We can can also pass functions(middleware) to our model here`using the schema;

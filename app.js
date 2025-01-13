@@ -39,6 +39,7 @@ app.use("/api/v1/auth/", uploadRoutes);
 
 app.use(bodyParser.json());
 app.use(logger("dev"));
+// app.use(morgan('tiny'))
 // Serve the uploaded images from the /uploads folder in database
 app.use('/api/v1/uploadFiles/', testing1Router)
 

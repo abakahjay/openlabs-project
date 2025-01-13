@@ -50,7 +50,7 @@ const signUp = async (req, res) => {
         maxAge: 24 * 60 * 60 * 1000, // Expiry time (optional)
     });
     // req.session.userId = newUser._id;
-    res.status(StatusCodes.CREATED).json({ message: "User registered successfully!", token, userId: UserId.split('"')[1] });
+    res.status(StatusCodes.CREATED).json({ message: "User registered successfully!",user:newUser, token, userId: UserId.split('"')[1] });
 };
 
 // Login Route
