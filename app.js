@@ -143,10 +143,10 @@ const start = async () => {
         //Connect the Database
         //We must always include our connect database method in the server application
         await connectDB(process.env.MONGO_URI).then(() => {
-            console.log('Connected to MongoDB...')
+            console.log('\x1b[36m%s\x1b[0m','Connected to MongoDB...')
         })
 
-        server.listen(port, console.log(`Server Listening on http://localhost:${port}`));
+        server.listen(port, console.log('\x1b[42m%s\x1b[0m', `Server Listening on === http://localhost:${port}`));
         // https.createServer(sslOptions, app).listen(port, () => {
         //     console.log(`Server running on https://localhost:${port}`);
         // });
