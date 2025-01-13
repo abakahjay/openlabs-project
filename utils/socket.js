@@ -29,6 +29,11 @@ const setupSocket = (io) => {
             console.log('User disconnected:', socket.id);
             users.delete(userId);
         });
+
+        //Handle Error
+        socket.on('connect_error', (err) => {
+            console.error('Connection Error:', err);
+        });
     });
 };
 
