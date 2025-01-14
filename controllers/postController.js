@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Post = require('../models/Posts');
 
 exports.createPost = async (req, res) => {
@@ -6,11 +7,11 @@ exports.createPost = async (req, res) => {
   try {
     const newPost = new Post({
       caption,
-      image: req.file.path,
-      user: userId,
+      postId: req.file.id, // Save GridFS file ID
+      createdBy: userId,
     });
-    await newPost.save();
 
+    await newPost.save();
     res.status(201).json(newPost);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -26,22 +27,16 @@ exports.getPosts = async (req, res) => {
   }
 };
 
-exports.likePost = async (req, res) => {
-  const { id } = req.params;
-  const userId = req.body.userId;
+exports.getImage = async (req, res) => {
+  const { id } = req.params;//ImageId
 
-  try {
-    const post = await Post.findById(id);
+  const gfs = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'uploads' });
 
-    if (!post.likes.includes(userId)) {
-      post.likes.push(userId);
-    } else {
-      post.likes = post.likes.filter(like => like.toString() !== userId);
+  gfs.find({ _id: mongoose.Types.ObjectId(id) }).toArray((err, files) => {
+    if (!files || files.length === 0) {
+      return res.status(404).json({ error: 'File not found' });
     }
 
-    await post.save();
-    res.status(200).json(post);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+    gfs.openDownloadStream(mongoose.Types.ObjectId(id)).pipe(res);
+  });
 };
