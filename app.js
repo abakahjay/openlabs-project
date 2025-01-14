@@ -29,6 +29,9 @@ const deliveryRouter = require('./routes/delivery.js')
 const changeDelRouter = require('./routes/cart2.js')
 const messageRoutes = require('./routes/messageRoutes');
 const setupSocket = require('./utils/socket');
+const userRoutes = require('./routes/userRoute');
+const postRoutes = require('./routes/postRoute');
+const commentRoutes = require('./routes/commentRoute');
 
 
 
@@ -121,6 +124,10 @@ app.use('/api/v1/orders', ordersRouter)
 app.use('/api/v1/delivery', deliveryRouter)
 app.use('/api/v1/changedel', changeDelRouter)
 app.use('/api/v1/messages', messageRoutes);
+// app.use('/api/v1/uploads', express.static('uploads')); // Serve uploaded images
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1//posts', postRoutes);
+app.use('/api/v1/comments', commentRoutes);
 
 // Setup Socket.IO
 setupSocket(io);

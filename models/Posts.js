@@ -22,10 +22,10 @@ const PostSchema = new mongoose.Schema({
             }
         ],
         createdBy: {
-        type: mongoose.Types.ObjectId,
-        ref: 'User',
+            type: mongoose.Types.ObjectId,
+            ref: 'User',
+            required: [true, 'Please Provide the User Id']
         },
-        required: [true, 'Please Provide the User Id']
 },{ timestamps: true })//An extra Schema parameter for timestamps(important)
 
 const Posts = mongoose.model("Posts", PostSchema);

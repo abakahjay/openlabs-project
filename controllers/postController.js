@@ -1,4 +1,4 @@
-const Post = require('../models/Post');
+const Post = require('../models/Posts');
 
 exports.createPost = async (req, res) => {
   const { caption, userId } = req.body;
