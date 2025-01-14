@@ -1,6 +1,6 @@
 const sendEmail = require('./sendEmail');
 
-const sendResetPassswordEmail = async ({ name, email, token, origin }) => {
+const sendResetPasswordEmail = async ({ name, email, token, origin }) => {
   const resetURL = `${origin}/user/reset-password?token=${token}&email=${email}`;
   const message = `<p>Please reset password by clicking on the following link : 
   <a href="${resetURL}">Reset Password</a></p>`;
@@ -9,9 +9,9 @@ const sendResetPassswordEmail = async ({ name, email, token, origin }) => {
     to: email,
     subject: 'Reset Password',
     html: `<h4>Hello, ${name}</h4>
-   ${message}
-   `,
+    ${message}
+    `,
   });
 };
 
-module.exports = sendResetPassswordEmail;
+module.exports = sendResetPasswordEmail;
