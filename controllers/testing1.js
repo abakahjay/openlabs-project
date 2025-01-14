@@ -15,7 +15,7 @@ let bucket;
         bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
             bucketName: "uploads",
         });
-        console.log('GridFS Connected for testing');
+        console.log('\x1b[35m%s\x1b[0m','GridFS Connected for testing');
     });
 })();
 

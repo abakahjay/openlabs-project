@@ -121,6 +121,16 @@ const userId = async (req, res) => {
 
 
 
+
+
+//Logout
+const logout =async(req, res) => {
+
+    res.status(StatusCodes.OK).json({ message: 'Successfully logged out'});
+}
+
+
+
 //Email Verification
 
 const verifyEmail = async (req, res) => {
@@ -151,5 +161,6 @@ module.exports = {
     login,
     dashboard,
     userId,
-    verifyEmail
+    verifyEmail,
+    logout
 };

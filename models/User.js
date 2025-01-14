@@ -58,7 +58,7 @@ const UserSchema = new mongoose.Schema({
         {
             type:mongoose.Schema.Types.ObjectId,
             ref: "uploads", // Reference to the GridFS bucket
-            default: null 
+            default: null
         }
     ],
     following: [
