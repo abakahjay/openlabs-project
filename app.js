@@ -124,7 +124,6 @@ app.use('/api/v1/orders', ordersRouter)
 app.use('/api/v1/delivery', deliveryRouter)
 app.use('/api/v1/changedel', changeDelRouter)
 app.use('/api/v1/messages', messageRoutes);
-// app.use('/api/v1/uploads', express.static('uploads')); // Serve uploaded images
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1//posts', postRoutes);
 app.use('/api/v1/comments', commentRoutes);
