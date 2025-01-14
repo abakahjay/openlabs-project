@@ -52,7 +52,8 @@ const UserSchema = new mongoose.Schema({
         default: null // By default, no profile picture is associated
     },
     bio: {
-        type:String
+        type:String,
+        default: 'Add your Bio'
     },
     followers: [
         {
@@ -71,7 +72,7 @@ const UserSchema = new mongoose.Schema({
     posts: [
         {
             type:mongoose.Schema.Types.ObjectId,
-            ref: "User", // Reference to the GridFS bucket
+            ref: "Posts",
             default: null
         }
     ],
