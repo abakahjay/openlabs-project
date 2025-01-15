@@ -42,7 +42,27 @@ console.log('\x1b[0m%s\x1b[0m', 'This is normal again'); // Reset style
         return;
     }
     
+    const FetchImage=async()=>{
+        try {
+            const profilePictureId=localStorage.getItem(`profileId-${userId}`);
+            const response= await fetch(`/api/v1/uploadFiles/download/${profilePictureId}`)
 
+            // Create a blob from the response
+            const blob = await response.blob();
+
+            // Create an object URL for the image to display it
+            const imageURL = URL.createObjectURL(blob);
+            console.log(imageURL);
+                    // if (data.success) {
+            document.getElementById("upload-statuss").innerText = "Profile picture loaded successfully.";
+            document.getElementById("profile-pic").src = imageURL;
+        }catch{
+                document.getElementById("upload-statuss").innerText ="Failed to load image.";
+        }
+        setTimeout(()=>{
+            document.getElementById("upload-statuss").innerText = ""
+        },2000)
+    }
     // Fetch user details
     await fetch('/api/v1/auth/dashboard', {
         headers: { Authorization: `Bearer ${token}` },
@@ -63,7 +83,11 @@ console.log('\x1b[0m%s\x1b[0m', 'This is normal again'); // Reset style
                 document.getElementById("user-details").innerText = `Email: ${email}\nUsername: ${username}`;
 
                 // Display profile picture (if available)
-                document.getElementById("profile-pic").src = profile_picture;
+                if(profile_picture){
+                    document.getElementById("profile-pic").src = profile_picture
+                }else{
+                    FetchImage();
+                }
                 // localStorage.removeItem(`token-${userId}`);
                 // localStorage.removeItem("userId");
                 // token=data.token;
@@ -158,9 +182,10 @@ console.log('\x1b[0m%s\x1b[0m', 'This is normal again'); // Reset style
             .then((res) => res.json())
             .then((data) => {
                 console.log(data);
+                localStorage.setItem(`profileId-${userId}`, data.fileId);
                 if (data.success) {
                     document.getElementById("upload-statuss").innerText = "Profile picture uploaded successfully.";
-                    document.getElementById("profile-pic").src = data.profile_picture;
+                    FetchImage()
                 } else {
                     document.getElementById("upload-statuss").innerText = data.error || "Failed to upload image.";
                 }
@@ -168,5 +193,11 @@ console.log('\x1b[0m%s\x1b[0m', 'This is normal again'); // Reset style
             .catch((err) => {
                 document.getElementById("upload-statuss").innerText ="Error uploading image.";
             });
+            setTimeout(()=>{
+                document.getElementById("upload-statuss").innerText = ""
+            },2000)
+
+            
+            
     });
 });

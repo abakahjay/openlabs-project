@@ -45,6 +45,9 @@ app.use(logger("dev"));
 // app.use(morgan('tiny'))
 // Serve the uploaded images from the /uploads folder in database
 app.use('/api/v1/uploadFiles/', testing1Router)
+//This is for posts
+
+app.use('/api/v1/posts', postRoutes);
 
 
 // rest of the packages
@@ -125,7 +128,7 @@ app.use('/api/v1/delivery', deliveryRouter)
 app.use('/api/v1/changedel', changeDelRouter)
 app.use('/api/v1/messages', messageRoutes);
 app.use('/api/v1/users', userRoutes);
-app.use('/api/v1//posts', postRoutes);
+
 app.use('/api/v1/comments', commentRoutes);
 
 // Setup Socket.IO

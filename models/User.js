@@ -116,7 +116,8 @@ UserSchema.methods.comparePasswords =async function (canditatePassword) {
     return isMatch;
 };
 
-
+UserSchema.index({ email: 1 }, { unique: true }); // Ensure unique index on email
+UserSchema.index({ username: 1 }, { unique: true }); // Ensure unique index on username
 
 const User = mongoose.model("User", UserSchema);
 module.exports = User;

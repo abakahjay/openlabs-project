@@ -38,14 +38,14 @@ const uploadProfilePic = async (req, res) => {
     const userId = req.user.userId;  // Example: req.user.userId from authentication middleware
 
     // Update the user's profile picture URL in the database
-    const user = await User.findByIdAndUpdate(userId, { profile_picture: profilePicUrl }, { new: true });
-
+    const user = await User.findByIdAndUpdate(userId, { profile_picture: null ,profile_picture_id:req.file.id }, { new: true });
+    // await user.save();
     // Handle case where user is not found
     if (!user) {
         throw new NotFoundError('User Not Found')
     }
     // Return the new profile picture URL as a response
-    res.status(StatusCodes.OK).json({ success: true, profile_picture: user.profile_picture });
+    res.status(StatusCodes.OK).json({ success: true, profile_picture: user.profile_picture, fileId: req.file.id });
 };
 
 
@@ -71,6 +71,10 @@ const uploadMultipleFiles = async (req, res) => {
 // Download a file by ID
 const downloadFileById = async (req, res) => {
         const { fileId } = req.params;
+
+        if(!fileId) {
+            throw new BadRequestError('Please provide a fileId')
+        }
         const file = await bucket.find({ _id: new ObjectId(fileId) }).toArray();
 
         if (file.length === 0) return res.status(404).json({ error: { text: "File not found" } });

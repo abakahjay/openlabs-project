@@ -1,9 +1,5 @@
 const mongoose = require('mongoose')
 const PostSchema = new mongoose.Schema({
-        datePosted: {
-            type:String,
-            required:[true,'Please Provide the Date Ordered']
-        },
         postId: {
                     type: mongoose.Types.ObjectId,
                     ref: 'uploads',
