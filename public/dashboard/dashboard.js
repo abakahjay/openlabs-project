@@ -149,7 +149,7 @@ console.log('\x1b[0m%s\x1b[0m', 'This is normal again'); // Reset style
                 document.getElementById("upload-status").innerText ="Error uploading image.";
             });
             setTimeout(()=>{
-                document.getElementById("upload-statuss").innerText = ""
+                document.getElementById("upload-status").innerText = ""
             },2000)
     });
 
