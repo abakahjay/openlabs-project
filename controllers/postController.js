@@ -35,6 +35,7 @@ exports.getPosts = async (req, res) => {
 
 exports.getImage = async (req, res) => {
     const { id } = req.params;//ImageId
+    console.log('\x1b[36m%s\x1b[0m','User Wants to get Image')
 
     if(!id){
       throw new BadRequestError('Please provide the image id')
@@ -44,7 +45,7 @@ exports.getImage = async (req, res) => {
 
     const file = await gfs.find({ _id: new ObjectId(id) }).toArray();
   
-    if (file.length === 0) {
+    if (!file||file.length === 0) {
       throw new NotFoundError(`No Image found with id: ${id}`)
     }
 

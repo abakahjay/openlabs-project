@@ -19,7 +19,6 @@ console.log('\x1b[4m%s\x1b[0m', 'This is underlined');  // Underlined text
 
 // Reset Style
 console.log('\x1b[0m%s\x1b[0m', 'This is normal again'); // Reset style
-
     const urlParams = new URLSearchParams(window.location.search);
     const userId =urlParams.get("id")|| localStorage.getItem("userId") || sessionStorage.getItem("userId");
     const userTok =urlParams.get("oven")
