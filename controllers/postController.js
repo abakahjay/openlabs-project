@@ -8,7 +8,7 @@ const User = require('../models/User');
 exports.createPost = async (req, res) => {
   const { caption, comments } = req.body;
   const {userId} = req.query;
-    // console.log(req.file)
+
     if(!userId) {
       throw new BadRequestError('You must provide a user Id ')
     }

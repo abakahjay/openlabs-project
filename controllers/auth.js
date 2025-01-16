@@ -126,8 +126,19 @@ const userId = async (req, res) => {
 
 //Logout
 const logout =async(req, res) => {
+    const {userId} = req.query;
+    console.log(req.query)
+    if (!userId) {
+        throw new BadRequestError('PLease Provide UserId')
+    }
 
-    res.status(StatusCodes.OK).json({ message: 'Successfully logged out'});
+    const user = await User.findOne({ _id:userId })
+
+    if (!user) {
+        throw new UnauthenticatedError(`Invalid userId:${userId}, you are not authorized to logout this user.`);
+    }
+
+    res.status(StatusCodes.OK).json({ message: `Successfully logged out: ${user.firstName}`});
 }
 
 

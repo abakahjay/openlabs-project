@@ -58,7 +58,7 @@ const UserSchema = new mongoose.Schema({
     followers: [
         {
             type:mongoose.Schema.Types.ObjectId,
-            ref: "uploads", // Reference to the GridFS bucket
+            ref: "User", // Reference to the GridFS bucket
             default: null
         }
     ],
@@ -84,12 +84,21 @@ const UserSchema = new mongoose.Schema({
 
 
 //We always have to use the function keyword because using this on arrow functions will return undefined
-UserSchema.pre('save', async function () {//The first parameter is the conditional parameter
-    //So in this case the function will run before save
-    //If we are using an  async function we don't need to bring the next parameter.
-    const salt = await bcrypt.genSalt(10)
-    this.password = await bcrypt.hash(this.password, salt)
-})
+// UserSchema.pre('save', async function () {//The first parameter is the conditional parameter
+//     //So in this case the function will run before save
+//     //If we are using an  async function we don't need to bring the next parameter.
+//     const salt = await bcrypt.genSalt(10)
+//     this.password = await bcrypt.hash(this.password, salt)
+// })
+UserSchema.pre('save', async function (next) {
+    // Only hash the password if it has been modified
+    if (this.isModified('password')) {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+    }
+    next(); // Proceed to save
+});
+
 
 
 //We can also generate the token here with the UserSchema.methods object

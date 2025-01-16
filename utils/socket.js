@@ -45,6 +45,14 @@ const setupSocket = (io) => {
             }
         });
 
+
+        // Listen for typing event
+        socket.on('typing', (data) => {
+            const { sender, receiver } = data;
+            console.log('A user is typing')
+            socket.broadcast.emit('typing', { sender, receiver });
+        });
+
         // Handle disconnection
         socket.on('disconnect', () => {
             console.log('\x1b[31m%s\x1b[0m\x1b[4m%s\x1b[0m','User disconnected:', socket.id);
