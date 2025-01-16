@@ -71,7 +71,7 @@ const uploadMultipleFiles = async (req, res) => {
 // Download a file by ID
 const downloadFileById = async (req, res) => {
         const { fileId } = req.params;
-
+        console.log('\x1b[36m%s\x1b[0m', `Downloading file:${fileId}`)
         if(!fileId) {
             throw new BadRequestError('Please provide a fileId')
         }

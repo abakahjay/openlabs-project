@@ -12,6 +12,7 @@ const express = require('express');
 const bodyParser = require("body-parser");
 const logger = require("morgan");
 const app = express();
+const cors = require("cors");
 const connectDB = require('./db/connect.js');
 const mongoose = require('mongoose')
 const helmet = require('helmet');
@@ -33,6 +34,8 @@ const userRoutes = require('./routes/userRoute');
 const postRoutes = require('./routes/postRoute');
 const commentRoutes = require('./routes/commentRoute');
 
+
+app.use(cors());//This allows connections from other ports
 
 
 
@@ -56,7 +59,6 @@ const fileUpload = require('express-fileupload');
 const rateLimiter = require('express-rate-limit');
 const xss = require('xss-clean');
 const mongoSanitize = require('express-mongo-sanitize');
-const cors = require("cors");
 
 
 //All this is for license for https secure
@@ -86,7 +88,10 @@ const io = require('socket.io')(server, {
 
 
 //Middleware
-app.use(cors({ credentials: true }));//This allows connections from other ports
+
+
+
+
 // app.use(session({
 //     secret: process.env.SESSION_KEY,
 //     resave: true,

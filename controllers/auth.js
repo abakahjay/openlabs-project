@@ -5,6 +5,7 @@ const User = require("../models/User");
 const { UnauthenticatedError, BadRequestError,NotFoundError } = require('../errors')
 const { StatusCodes } = require('http-status-codes');
 const sendVerificationEmail = require('../utils/sendVerficationEmail.js');
+const path= require('path')
 let Id;
 
 // Generate a JWT
@@ -151,7 +152,7 @@ const verifyEmail = async (req, res) => {
         }
         user.isVerified = true;
         await user.save()
-        res.send('Email verified successfully!');
+        res.sendFile(path.join(__dirname, 'email-verification-success.html'));
 };
 
 
