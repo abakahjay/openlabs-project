@@ -14,6 +14,10 @@ const authenticationMiddleware = async (req, res, next) => {
 
     const token = authHeader.split(' ')[1]
     // console.log(token)
+    if(token==='undefined'){
+        console.log('No token provided')
+        return
+    }
 
     try {
             //Verify the token if its valid
