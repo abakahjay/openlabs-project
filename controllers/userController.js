@@ -98,5 +98,6 @@ exports.getUserByName = async (req, res) => {
     if(!user){
       throw new NotFoundError(`No user with username: ${username}`)
     }
+    console.log('\x1b[36m%s\x1b[0m',`Username: ${username} found`)
     res.status(StatusCodes.OK).json({message:`User: ${username} found successfully `,user});
 };

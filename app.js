@@ -33,6 +33,14 @@ const setupSocket = require('./utils/socket');
 const userRoutes = require('./routes/userRoute');
 const postRoutes = require('./routes/postRoute');
 const commentRoutes = require('./routes/commentRoute');
+const googleAuth =require('./routes/googleAuth');
+const passport = require("passport");
+require("./utils/passport"); // Passport configuration file
+
+
+
+
+
 
 
 app.use(cors());//This allows connections from other ports
@@ -51,6 +59,9 @@ app.use('/api/v1/uploadFiles/', testing1Router)
 //This is for posts
 
 app.use('/api/v1/posts', postRoutes);
+
+// Initialize Passport
+app.use(passport.initialize());
 
 
 // rest of the packages
@@ -126,6 +137,7 @@ app.use(express.json());
 
 // Routes to API's
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/auth", googleAuth);
 app.use('/api/v1/products', productsRouter)
 app.use('/api/v1/cart', cartRouter)
 app.use('/api/v1/orders', ordersRouter)
