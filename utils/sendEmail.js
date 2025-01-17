@@ -2,12 +2,15 @@ const nodemailer = require('nodemailer');
 
 // Create reusable transporter object using the default SMTP transport
 const transporter = nodemailer.createTransport({
-  service: 'smtp.gmail.com', // You can use any email service like SendGrid or Mailgun
-  port: 465,
-  secure: true,
+  service: 'gmail', // You can use any email service like SendGrid or Mailgun
+  // port: 465,
+  // secure: true,
   auth: {
     user: 'abakahjoshua1@gmail.com', // Replace with your email address
-    pass: 'ijdm civf atbt xdxt'  // Replace with your email password (or use OAuth2)
+    pass: 'phzb ytqd ixvo ywjw'  // Replace with your email password (or use OAuth2)
+  },
+  tls: {
+    rejectUnauthorized: false, // Disable certificate validation
   },
   connectionTimeout: 10000, // 10 seconds
 });

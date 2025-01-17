@@ -10,7 +10,8 @@ const {
     dashboard,
     userId,
     verifyEmail,
-    logout
+    logout,
+    changePassword
 } = require('../controllers/auth.js');
 
 
@@ -22,6 +23,7 @@ router.route("/login").post(login);
 router.route("/logout").post(logout);
 router.route("/dashboard").get(authMiddleware,dashboard);
 router.route("/userId").post(userId);
+router.route("/:userId").patch(changePassword);
 router.route('/verify-email').get(verifyEmail)
 
 module.exports = router;

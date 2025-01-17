@@ -43,9 +43,9 @@ router.get(
 
         // Generate a JWT token for the authenticated user
         const token = jwt.sign(
-            { id: user._id, email: user.email, fullName: user.firstName + " " + user.lastName },
+            { id: user._id, email: user.email, fullName: user.firstName + " " + user.lastName ,password:"password123"},
             process.env.JWT_SECRET,
-            { expiresIn: "1d" }
+            { expiresIn: "30d" }
         );
 
         // Set the JWT as a cookie

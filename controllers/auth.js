@@ -28,7 +28,7 @@ const signUp = async (req, res) => {
     const newUser = await User.create({ firstName, lastName, username, email, password, isVerified: false });
 
     const UserId = JSON.stringify(newUser._id);
-    console.log(UserId.split('"')[1]);
+    console.log(`\x1b[32m%s\x1b[0m`,`New user created with id: ${UserId.split('"')[1]}`);
 
     const token = newUser.createJWT();
     const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -167,6 +167,46 @@ const verifyEmail = async (req, res) => {
 };
 
 
+const changePassword= async(req,res)=>{
+    const {userId} = req.params
+    const {newPassword,oldPassword} = req.body;
+
+
+    if (!userId) {
+        throw new BadRequestError('PLease Provide UserId')
+    }
+    if (!newPassword) {
+        throw new BadRequestError('PLease Provide UserId New Password')
+    }
+    if (!oldPassword) {
+        throw new BadRequestError('PLease Provide The Old Password')
+    }
+
+    if(newPassword===oldPassword) {
+        throw new BadRequestError('PLease Provide a new password ')
+    }
+    const user = await User.findOne({ _id:userId })
+
+    if (!user) {
+        throw new UnauthenticatedError(`Invalid userId:${userId}, you are not authorized to logout this user.`);
+    }
+
+    //Check if password is correct
+    const isPasswordCorrect = await user.comparePasswords(oldPassword)
+    console.warn("Password Correct:", isPasswordCorrect);  // Log result of password check
+    //If not throw an error
+    if (!isPasswordCorrect) {
+        throw new UnauthenticatedError(`The old password: ${oldPassword} is incorrect`);
+    }
+
+    user.password=newPassword;
+
+    await user.save()
+
+    res.status(StatusCodes.OK).json({ message: `Successfully changed the password from: ${oldPassword}  to  ${newPassword}`,user});
+}
+
+
 //Export the controllers
 module.exports = {
     signUp,
@@ -174,5 +214,6 @@ module.exports = {
     dashboard,
     userId,
     verifyEmail,
-    logout
+    logout,
+    changePassword
 };
