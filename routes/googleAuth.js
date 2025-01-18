@@ -52,7 +52,7 @@ router.get(
         res.cookie("token", token, { httpOnly: true });
 
         // Redirect to the frontend after successful authentication
-        res.redirect("http://localhost:7005"); // Redirect to your React app
+        res.redirect(process.env.REDIRECT_URL); // Redirect to your React app
     }
 );
 

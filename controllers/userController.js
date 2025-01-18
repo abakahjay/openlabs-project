@@ -95,9 +95,28 @@ exports.getUserByName = async (req, res) => {
     }
     // console.warn('Hi')
     const user = await User.findOne({username:username}).populate('followers following')
+    User
     if(!user){
       throw new NotFoundError(`No user with username: ${username}`)
     }
     console.log('\x1b[36m%s\x1b[0m',`Username: ${username} found`)
     res.status(StatusCodes.OK).json({message:`User: ${username} found successfully `,user});
+};
+
+
+exports.editUser = async (req, res) => {
+  const {username} = req.params
+  const {usernames,bio,firstName,lastName} = req.body
+  if(!username){
+    throw new BadRequestError('Please Provide a username')
+  }
+
+  // console.warn('Hi')
+  const user = await User.findOneAndUpdate({username:username},{username:usernames,bio,firstName,lastName},{ new: true, runValidators: true })//.populate('followers following')
+  // User.f
+  if(!user){
+    throw new NotFoundError(`No user with username: ${username}`)
+  }
+  console.log('\x1b[36m%s\x1b[0m',`Username: ${username} updated user details successfully `)
+  res.status(StatusCodes.OK).json({message:`User: ${username} updated user details successfully `,user});
 };
