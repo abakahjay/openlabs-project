@@ -7,15 +7,17 @@ const authenticationMiddleware = async (req, res, next) => {
     //We get the token from the headers of there request
     // console.log(req.headers.authorization);
     const authHeader = req.headers.authorization
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.log(authHeader)
+    
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')){
         throw new UnauthenticatedError('No token provided')
     }
-
     const token = authHeader.split(' ')[1]
-    // console.log(token)
+
+    console.log(token)
     if(token==='undefined'){
-        console.log('No token provided')
+        console.warn('No token provided')
         return
     }
 
