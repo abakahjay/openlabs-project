@@ -18,7 +18,7 @@ const UserSchema = new mongoose.Schema({
     },
     username: {
         type: String,
-        required: [true, 'Please Enter your username name'],
+        required: [true, 'Please Enter your username'],
         maxlength: 50,
         minlength: 3,
         unique: true,

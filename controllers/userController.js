@@ -106,17 +106,46 @@ exports.getUserByName = async (req, res) => {
 
 exports.editUser = async (req, res) => {
   const {username} = req.params
-  const {usernames,bio,firstName,lastName} = req.body
+  const {usernames,bio,firstName,lastName} = req.body.updatedUser?req.body.updatedUser:req.body
+  // console.log(req.body)
   if(!username){
     throw new BadRequestError('Please Provide a username')
   }
 
-  // console.warn('Hi')
   const user = await User.findOneAndUpdate({username:username},{username:usernames,bio,firstName,lastName},{ new: true, runValidators: true })//.populate('followers following')
-  // User.f
   if(!user){
     throw new NotFoundError(`No user with username: ${username}`)
+  }
+  if(req.file){
+    console.log(req.file)
+    user.profile_picture_id = req.file.id;
+    await user.save()
   }
   console.log('\x1b[36m%s\x1b[0m',`Username: ${username} updated user details successfully `)
   res.status(StatusCodes.OK).json({message:`User: ${username} updated user details successfully `,user});
 };
+
+
+exports.editUserProfilePic = async (req, res) => {
+  const {username} = req.params
+  if(!username){
+    throw new BadRequestError('Please Provide a username')
+  }
+
+  if(!req.file){
+    throw new BadRequestError('Please Provide an Image')
+  }
+
+  const user = await User.findOne({username:username})
+  
+  if(!user){
+    throw new NotFoundError(`No user with username: ${username}`)
+  }
+  
+  // console.log(req.file)
+  user.profile_picture_id = req.file.id;
+  await user.save()
+  console.log('\x1b[36m%s\x1b[0m',`Username: ${username} updated user profile pic successfully `)
+  res.status(StatusCodes.OK).json({message:`User: ${username} updated user profile pic successfully `,user});
+};
+

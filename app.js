@@ -31,6 +31,7 @@ const changeDelRouter = require('./routes/cart2.js')
 const messageRoutes = require('./routes/messageRoutes');
 const setupSocket = require('./utils/socket');
 const userRoutes = require('./routes/userRoute');
+const userProfilePic = require('./routes/userProfilePic');
 const postRoutes = require('./routes/postRoute');
 const commentRoutes = require('./routes/commentRoute');
 const googleAuth =require('./routes/googleAuth');
@@ -56,6 +57,8 @@ app.use(logger("dev"));
 // app.use(morgan('tiny'))
 // Serve the uploaded images from the /uploads folder in database
 app.use('/api/v1/uploadFiles/', testing1Router)
+
+app.use('/api/v1/userse', userProfilePic);
 //This is for posts
 
 app.use('/api/v1/posts', postRoutes);
