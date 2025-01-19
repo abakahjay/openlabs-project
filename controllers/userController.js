@@ -11,7 +11,7 @@ exports.followUser = async (req, res) => {
   const userId = req.body.userId;//FollowerId
 
   if(!userId){
-    throw new BadRequestError('Please Provide a follower id')
+    throw new BadRequestError('Please Provide a following id')
   }
 
     const user = await User.findById(id);
@@ -21,21 +21,21 @@ exports.followUser = async (req, res) => {
     }
 
 
-    const follower = await User.findById(userId);
+    const following = await User.findById(userId);
 
 
-    if(!follower){
+    if(!following){
       throw new NotFoundError(`No follower with id: ${userId}`)
     }
 
-    if (!user.followers.includes(userId)) {
-      user.followers.push(userId);
-      follower.following.push(id);
+    if (!user.following.includes(userId)) {
+      user.following.push(userId);
+      following.followers.push(id);
       await user.save();
-      await follower.save();
+      await following.save();
     }
-
-    res.status(StatusCodes.OK).json({ message: 'User followed!' });
+    console.log( '\x1b[32m%s\x1b[0m',`You: ${user.username} followed ${following.username}!`)
+    res.status(StatusCodes.OK).json({ message: `You: ${user.username} followed ${following.username}!` ,user,following});
   
 };
 
@@ -58,21 +58,22 @@ exports.unfollowUser = async (req, res) => {
     }
 
 
-    const follower = await User.findById(userId);
+    const following = await User.findById(userId);
 
 
-    if(!follower){
+    if(!following){
       throw new NotFoundError(`No follower with id: ${userId}`)
     }
 
 
-    user.followers = user.followers.filter(f => f.toString() !== userId);
-    follower.following = follower.following.filter(f => f.toString() !== id);
+    user.following = user.following.filter(f => f.toString() !== userId);
+    following.followers = following.followers.filter(f => f.toString() !== id);
 
     await user.save();
-    await follower.save();
+    await following.save();
+    console.log( '\x1b[31m%s\x1b[0m',`You: ${user.username} unfollowed ${following.username}!`)
 
-    res.status(StatusCodes.OK).json({ message: 'User unfollowed!' });
+    res.status(StatusCodes.OK).json({ message: `You: ${user.username} unfollowed ${following.username}!` ,user,following});
   
 };
 

@@ -4,8 +4,8 @@ const { followUser, unfollowUser, getUser,getUserByName,editUser,editUserProfile
 
 const router = express.Router();
 
-router.post('/:id/follow', followUser);
-router.post('/:id/unfollow', unfollowUser);
+router.patch('/:id/follow', followUser);
+router.patch('/:id/unfollow', unfollowUser);
 router.get('/:id', getUser);
 router.patch('/:username', getUserByName);
 router.patch('/:username/editUser',editUser);
