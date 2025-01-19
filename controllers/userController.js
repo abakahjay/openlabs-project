@@ -88,6 +88,14 @@ exports.getUser = async (req, res) => {
     }
     res.status(StatusCodes.OK).json({message:`User:${id} found successfully `,user});
 };
+exports.getAllUsers = async (req, res) => {
+    
+    const users = await User.find({}).populate('followers following');
+    if(!users){
+      throw new NotFoundError(`No users found in database`);
+    }
+    res.status(StatusCodes.OK).json({message:`Users found successfully`,nbHits:users.length,users});
+};
 
 exports.getUserByName = async (req, res) => {
     const {username} = req.params
