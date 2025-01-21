@@ -77,7 +77,7 @@ const UserSchema = new mongoose.Schema({
         }
     ],
     tokens: [{ type: String }] // Array to store tokens
-});
+},{ timestamps: true });
 //We can can also pass functions(middleware) to our model here`using the schema;
 //We can use .pre and .post to create  the function
 //Every single this over here refers to the document

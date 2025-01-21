@@ -86,7 +86,9 @@ exports.getUser = async (req, res) => {
     if(!user){
       throw new NotFoundError(`No user with id: ${id}`)
     }
-    res.status(StatusCodes.OK).json({message:`User:${id} found successfully `,user});
+                                                                                                                                      
+    console.log('\x1b[36m%s\x1b[0m',`Username: ${id} found`)
+    res.status(StatusCodes.OK).json({message:`User: ${id} found successfully `,user});
 };
 exports.getAllUsers = async (req, res) => {
     
