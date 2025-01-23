@@ -76,7 +76,11 @@ const UserSchema = new mongoose.Schema({
             default: null
         }
     ],
-    tokens: [{ type: String }] // Array to store tokens
+    tokens: [{ type: String }], // Array to store tokens
+    created:{
+        type:Number,
+        default:Date.now()
+    }
 },{ timestamps: true });
 //We can can also pass functions(middleware) to our model here`using the schema;
 //We can use .pre and .post to create  the function

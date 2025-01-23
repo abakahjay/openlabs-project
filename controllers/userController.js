@@ -92,7 +92,7 @@ exports.getUser = async (req, res) => {
 };
 exports.getAllUsers = async (req, res) => {
     
-    const users = await User.find({}).populate('followers following');
+    const users = await User.find({}).populate('followers following').sort('-created').limit(5);
     if(!users){
       throw new NotFoundError(`No users found in database`);
     }

@@ -15,6 +15,10 @@ const commentSchema = new mongoose.Schema({
         ref: 'Posts',
         required: true
     },
+    created:{
+        type:Number,
+        default: new Date()
+    }
 }, { timestamps: true });
 
 

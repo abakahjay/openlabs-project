@@ -4,6 +4,7 @@ const { ObjectId } = require("mongodb");
 const { UnauthenticatedError, BadRequestError, NotFoundError } = require('../errors')
 const { StatusCodes } = require('http-status-codes');
 const User = require('../models/User');
+const Comment = require('../models/Comments');
 
 exports.createPost = async (req, res) => {
   const { caption, comments } = req.body;
@@ -25,19 +26,20 @@ exports.createPost = async (req, res) => {
       caption,
       postId: req.file.id, // Save GridFS file ID
       createdBy: userId,
+      created: new Date(),
     });
     user.posts.push(req.file.id);
     console.log('\x1b[34m%s\x1b[0m',`User: ${userId} made a post`)
     console.log(req.file)
     await newPost.save();
     await user.save();
-    res.status(201).json({newPost,user});
+    res.status(StatusCodes.CREATED).json({newPost,user});
   
 };
 
 exports.getPosts = async (req, res) => {
-    const posts = await Post.find().populate('user').populate('comments');
-    res.status(200).json({nbHits:posts.length,posts});
+    const posts = await Post.find().populate('user').populate('comments').sort('-created');
+    res.status(StatusCodes.OK).json({nbHits:posts.length,posts});
 };
 
 
@@ -51,9 +53,10 @@ exports.getUserPosts = async (req, res) => {
     if(!user){
       throw new NotFoundError(`No User found with id:${id}`)
     }
-    const posts = await Post.find({createdBy: id}).populate('user').populate('comments');
+    const posts = await Post.find({createdBy: id}).populate('comments').populate('likes').populate('user').sort('-created');
+  
     console.log('\x1b[36m%s\x1b[0m',`${user.username} posts found`)
-    res.status(200).json({message:`${user.username} posts found`,nbHits:posts.length,posts});
+    res.status(StatusCodes.OK).json({message:`${user.username} posts found`,nbHits:posts.length,posts});
 };
 
 exports.getImage = async (req, res) => {
@@ -99,9 +102,20 @@ exports.deletePost = async (req, res) => {
             user.posts.splice(index, 1);
           }
         })
+
+
         await  gfs.delete(new ObjectId(fileId));
         await user.save();
         const post = await Post.findOneAndDelete({postId:fileId});
+
+        if(!post){
+          throw new NotFoundError(`No post found with id: ${fileId}`)
+        }
+        const comment = await Comment.findOneAndDelete({post:post._id});
+
+        // if(!comment){
+        //   throw new NotFoundError(`No comments found with id: postId: ${ post._id}`);
+        // }
         res.status(StatusCodes.OK).json({ text: "File deleted successfully!",user,post });
 };
 
