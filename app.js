@@ -152,6 +152,22 @@ app.use('/api/v1/users', userRoutes);
 
 app.use('/api/v1/comments', commentRoutes);
 
+
+//This is for the Ai Chatbot
+app.post('/api/chat', (req, res) => {
+    const userMessage = req.body.message;
+
+    const python = spawn('python', ['../model/respond.py', userMessage]);
+
+    python.stdout.on('data', (data) => {
+        res.json({ reply: data.toString() });
+    });
+
+    python.stderr.on('data', (data) => {
+        console.error(`Error: ${data}`);
+    });
+});
+
 // Setup Socket.IO
 setupSocket(io);
 
