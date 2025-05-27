@@ -36,7 +36,7 @@ const postRoutes = require('./routes/postRoute');
 const commentRoutes = require('./routes/commentRoute');
 const googleAuth =require('./routes/googleAuth');
 const passport = require("passport");
-const { spawn } = require('child_process');
+const { spawn } = require('child_process');//Used to run python code with javascript
 require("./utils/passport"); // Passport configuration file
 
 
@@ -157,7 +157,7 @@ app.use('/api/v1/comments', commentRoutes);
 app.post('/api/chat', (req, res) => {
     const userMessage = req.body.message;
 
-    const python = spawn('python', ['../model/respond.py', userMessage]);
+    const python = spawn('C:/ProgramData/anaconda4/python.exe', ['./chatbot/respond.py', userMessage]);
 
     python.stdout.on('data', (data) => {
         res.json({ reply: data.toString() });
