@@ -157,13 +157,13 @@ app.use('/api/v1/comments', commentRoutes);
 app.post('/api/chat', (req, res) => {
     const userMessage = req.body.message;
 
-    const python = spawn('C:/ProgramData/anaconda4/python.exe', ['./chatbot/respond.py', userMessage]);
+    const python = spawn('C:/ProgramData/anaconda4/python.exe', ['./chatbot/respond.py', userMessage]);//This is used to run python in javascript
 
     python.stdout.on('data', (data) => {
-        res.json({ reply: data.toString() });
+        res.json({ reply: data.toString() });//This will send the printed message
     });
 
-    python.stderr.on('data', (data) => {
+    python.stderr.on('data', (data) => {//This will send the error
         console.error(`Error: ${data}`);
     });
 });

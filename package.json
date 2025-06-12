@@ -169,8 +169,18 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Backend For Anything you want to do",
   "resolutions": {
     "multer-gridfs-storage/mongodb": "^5.9.1"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abakahjay/openlabs-project.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/abakahjay/openlabs-project/issues"
+  },
+  "homepage": "https://github.com/abakahjay/openlabs-project#readme"
 }
