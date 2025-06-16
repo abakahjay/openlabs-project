@@ -1,26 +1,39 @@
-import json
-import random
-import pickle
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.naive_bayes import MultinomialNB
+from transformers import GPT2Tokenizer, GPT2LMHeadModel, Trainer, TrainingArguments, TextDataset, DataCollatorForLanguageModeling
 
-# Load intents
-with open('./chatbot/intents.json') as f:
-    intents = json.load(f)
+model_name = "gpt2"
+tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+model = GPT2LMHeadModel.from_pretrained(model_name)
 
-data = []
-labels = []
+def load_dataset(file_path, tokenizer, block_size=128):
+    return TextDataset(
+        tokenizer=tokenizer,
+        file_path=file_path,
+        block_size=block_size
+    )
 
-for intent in intents['intents']:
-    for pattern in intent['patterns']:
-        data.append(pattern)
-        labels.append(intent['tag'])
+train_dataset = load_dataset("data/your_dataset.txt", tokenizer)
 
-vectorizer = CountVectorizer()
-X = vectorizer.fit_transform(data)
+data_collator = DataCollatorForLanguageModeling(
+    tokenizer=tokenizer,
+    mlm=False,
+)
 
-model = MultinomialNB()
-model.fit(X, labels)
+training_args = TrainingArguments(
+    output_dir="./fine_tuned_model",
+    overwrite_output_dir=True,
+    num_train_epochs=3,
+    per_device_train_batch_size=2,
+    save_steps=500,
+    save_total_limit=2,
+)
 
-with open("./chatbot/chatbot_model.pkl", "wb") as f:
-    pickle.dump((model, vectorizer), f)
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    data_collator=data_collator,
+    train_dataset=train_dataset,
+)
+
+trainer.train()
+trainer.save_model("./fine_tuned_model")
+tokenizer.save_pretrained("./fine_tuned_model")

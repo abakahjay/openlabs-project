@@ -1,16 +1,17 @@
-import mongoose from "mongoose";
-
+const mongoose = require("mongoose");
 const userChatsSchema = new mongoose.Schema(
   {
     userId: {
-      type: String,
-      required: true,
+        type: mongoose.Types.ObjectId,
+        ref: 'User',
+        required: [true, 'Please Provide the User Id']
     },
     chats: [
       {
-        _id: {
-          type: String,
-          required: true,
+        chatId: {
+          type: mongoose.Types.ObjectId,
+          ref: 'Chat',
+          required: [true, 'Please Provide the Chat Id']
         },
         title: {
           type: String,
@@ -20,11 +21,22 @@ const userChatsSchema = new mongoose.Schema(
           type: Date,
           default:Date.now()
         },
+        created:{
+          type:Number,
+          default:Date.now()
+        },
       },
     ],
+    created:{
+      type:Number,
+      default:Date.now()
+    },
   },
   { timestamps: true }
-);  
+);
 
-export default mongoose.models.userchats ||
-  mongoose.model("userchats", userChatsSchema);
+const UserChats = mongoose.model("UserChats", userChatsSchema);
+module.exports = UserChats;
+
+// export default mongoose.models.UserChats ||
+//   mongoose.model("UserChats", userChatsSchema);

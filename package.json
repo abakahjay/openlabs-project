@@ -164,7 +164,8 @@
     "yamljs": "^0.3.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --env-file .env app.js"
   },
   "keywords": [],
   "author": "",
@@ -173,7 +174,6 @@
   "resolutions": {
     "multer-gridfs-storage/mongodb": "^5.9.1"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/abakahjay/openlabs-project.git"

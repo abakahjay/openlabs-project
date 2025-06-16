@@ -35,11 +35,15 @@ const userProfilePic = require('./routes/userProfilePic');
 const postRoutes = require('./routes/postRoute');
 const commentRoutes = require('./routes/commentRoute');
 const googleAuth =require('./routes/googleAuth');
+const aiRoutes = require('./routes/chatAi');
+const aiImageRoutes = require('./routes/sendAiImage');
 const passport = require("passport");
+const { ClerkExpressRequireAuth }= require("@clerk/clerk-sdk-node");//This handles user logins  and stuff
+// console.log(ClerkExpressRequireAuth)
+
+
 const { spawn } = require('child_process');//Used to run python code with javascript
 require("./utils/passport"); // Passport configuration file
-
-
 
 
 
@@ -56,6 +60,9 @@ app.use("/api/v1/auth/", uploadRoutes);
 app.use(bodyParser.json());
 app.use(logger("dev"));
 // app.use(morgan('tiny'))
+
+
+//We put all the file upload routes up here so that it doesn't get affected by some middleware for json
 // Serve the uploaded images from the /uploads folder in database
 app.use('/api/v1/uploadFiles/', testing1Router)
 
@@ -63,6 +70,7 @@ app.use('/api/v1/userse', userProfilePic);
 //This is for posts
 
 app.use('/api/v1/posts', postRoutes);
+app.use('/api/v1/ai',aiImageRoutes );
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -151,6 +159,10 @@ app.use('/api/v1/messages', messageRoutes);
 app.use('/api/v1/users', userRoutes);
 
 app.use('/api/v1/comments', commentRoutes);
+
+//This is for the Ai
+app.use('/api/v1/ai',aiRoutes );
+
 
 
 //This is for the Ai Chatbot

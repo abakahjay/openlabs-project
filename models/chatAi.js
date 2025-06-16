@@ -1,10 +1,10 @@
-import mongoose from "mongoose";
-
+const mongoose = require("mongoose");
 const chatSchema = new mongoose.Schema(
     {
         userId: {
-            type: String,
-            required: true,
+            type: mongoose.Types.ObjectId,
+            ref: 'User',
+            required: [true, 'Please Provide the User Id']
         },
         history: [
             {
@@ -17,12 +17,13 @@ const chatSchema = new mongoose.Schema(
                     {
                         text: {
                             type: String,
-                            required: true,
+                            required: false,
                         },
                     },
                 ],
                 img: {
-                    type: String,
+                    type: mongoose.Types.ObjectId,
+                    ref: 'uploads',
                     required: false,
                 },
             },
@@ -31,4 +32,6 @@ const chatSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-export default mongoose.models.chat || mongoose.model("chat", chatSchema);
+// export default mongoose.models.Chat || mongoose.model("Chat", chatSchema);
+const Chat = mongoose.model("Chat", chatSchema);
+module.exports = Chat;
