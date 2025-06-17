@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.route('/upload/:userId/:chatId').post( upload().single('file'), postImage);//
 router.get('/image/:id', getImage);//
-router.delete('/chats/image/:chatId/:fileId', deleteImage);
+router.delete('/chats/image/:chatId/:fileId', deleteImage);//
 
 
 module.exports = router;

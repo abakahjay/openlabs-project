@@ -7,14 +7,16 @@ const {
     getUserChats,
     getChatById,
     updateChat,
+    deleteMessage
 } = require('../controllers/chatAi');
 const router = express.Router();
 
 router.post("/chats/:userId",createChat);//
 router.get("/userchats/:userId", getUserChats);//
 router.get("/chats/:userId/:chatId", getChatById);//
-router.patch("/chats/:userId/:chatId", updateChat);
-router.delete('/chats/:userId/:chatId', deleteChat);
+router.patch("/chats/:userId/:chatId", updateChat);//
+router.delete('/chats/:userId/:chatId', deleteChat);//
+router.delete('/chats/:userId/:chatId/:messageIndex', deleteMessage);
 
 
 //This is for imagekit and clerk backend

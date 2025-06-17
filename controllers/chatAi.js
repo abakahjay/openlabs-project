@@ -78,21 +78,21 @@ exports.getUserChats = async (req, res) => {//This will send all userchats
 exports.getChatById = async (req, res) => {//This will access an individual chat with chatId and userId
     const userId = req.params.userId;
     const chatId =req.params.chatId
-    if (!userId) {
-        throw new BadRequestError('You must provide a user Id ')
+    if (!userId || !chatId) {
+        throw new BadRequestError('Please provide both userId and chatId');
     }
     const chat = await Chat.findOne({ _id: chatId, userId });
     if(!chat){
         throw new BadRequestError(`No chat with chatId: ${chatId}`)
     }
-    res.status(StatusCodes.OK).json({message:'Chat found succesfully',data:chat,nbHits: chat.length});
+    res.status(StatusCodes.OK).json({message:'Chat found successfully',data:chat,nbHits: chat.length});
 };
 
 exports.deleteChat = async (req, res) => {//This will access an individual chat with chatId and userId
     const userId = req.params.userId;
     const chatId =req.params.chatId
-    if (!userId) {
-        throw new BadRequestError('You must provide a user Id ')
+    if (!userId || !chatId) {
+        throw new BadRequestError('Please provide both userId and chatId');
     }
     const deletedChat = await Chat.findOneAndDelete({ _id: chatId, userId });
     if (!deletedChat) {
@@ -102,12 +102,40 @@ exports.deleteChat = async (req, res) => {//This will access an individual chat 
     // Remove from UserChats as well
     await UserChats.updateOne(
         { userId },
-        { $pull: { chats: { chatId: req.params.id } } }
+        { $pull: { chats: { chatId } } }
     );
 
     res.status(StatusCodes.OK).json({ message: 'Chat deleted successfully', deletedChat });
 
 };
+
+exports.deleteMessage = async (req, res) => {//This will access an individual chat with chatId and userId
+    const userId = req.params.userId;
+    const chatId =req.params.chatId
+    const messageIndex  =req.params.messageIndex
+    if (!userId || !chatId) {
+        throw new BadRequestError('Please provide both userId and chatId');
+    }
+    const chat = await Chat.findOne({ _id: chatId, userId });
+    if (!chat) {
+        throw new NotFoundError(`No chat found with id: ${chatId}`);
+    }
+    console.log({messageIndex})
+    if (messageIndex === undefined || isNaN(messageIndex) || messageIndex < 0 || messageIndex >= chat.history.length) {
+        throw new BadRequestError('Invalid or missing messageIndex');
+    }
+
+    const removedMessage = chat.history.splice(messageIndex, 1)[0];
+    await chat.save();
+
+    res.status(StatusCodes.OK).json({
+        message: 'Message deleted successfully',
+        removedMessage,
+        updatedChat: chat
+    });
+
+};
+
 
 exports.updateChat = async (req, res) => {//This is used to update a chat with a message
     const userId = req.params.userId;
@@ -120,9 +148,9 @@ exports.updateChat = async (req, res) => {//This is used to update a chat with a
     }
     const { question, answer, img } = req.body;
     console.log('Body:',req.body)
-    if (!question) {
-        throw new BadRequestError('You must provide a question from user ')
-    }
+    // if (!question) {
+    //     throw new BadRequestError('You must provide a question from user ')
+    // }
     const newItems = [
         ...(question
             ? [{ role: "user", parts: [{ text: question }], ...(img && { img }) }]
@@ -149,10 +177,10 @@ exports.postImage = async (req, res) => {
     const { text } =req.body
     console.log('\x1b[32m%s\x1b[0m', 'caption:')
 
-    if (!userId) {
-        throw new BadRequestError('You must provide a user Id ')
+    if (!userId || !chatId) {
+        throw new BadRequestError('Please provide both userId and chatId');
     }
-    console.log('File:',req.file)
+    console.log('File:',req.file.id)
     if (!req.file) {
         throw new BadRequestError('Please No file has been Detected')
     }
@@ -202,11 +230,10 @@ exports.getImage = async (req, res) => {//This is used to get an image from the 
 };
 
 exports.deleteImage = async (req, res) => {
-    const { userId } = req.query;
     const { fileId } = req.params;
     const { chatId } = req.params;
-    if (!fileId) {
-        throw new BadRequestError('Please provide a file id');
+    if (!fileId || !chatId) {
+        throw new BadRequestError('Please provide both fileId and chatId');
     }
     const gfs = new mongoose.mongo.GridFSBucket(mongoose.connection.db, { bucketName: 'uploads' });
 
@@ -215,22 +242,20 @@ exports.deleteImage = async (req, res) => {
     if (file.length === 0) {
         throw new NotFoundError(`No Image found with id: ${fileId}`)
     }
-    const user = await User.findOne({ _id: userId })
-    user.posts.forEach((post, index) => {
-        const newPostId = JSON.stringify(post).split('"')[1]
-        if (newPostId === fileId) {
-            console.log(post, index)
-            user.posts.splice(index, 1);
-        }
-    })
-
-
     await gfs.delete(new ObjectId(fileId));
-    await user.save();
-    const post = await Post.findOneAndDelete({ postId: fileId });
+    const chat = await Chat.findOne({ _id: chatId });
 
-    if (!post) {
-        throw new NotFoundError(`No post found with id: ${fileId}`)
+    if (!chat) {
+        throw new NotFoundError(`No chat found with id: ${chatId}`)
     }
-    res.status(StatusCodes.OK).json({ text: "File deleted successfully!", user, post });
+    chat.history = chat.history.filter(
+        (msg) => !(msg.img && msg.img.toString() === fileId)
+    );
+
+    await chat.save();
+
+    res.status(StatusCodes.OK).json({
+        message: 'Image and references deleted successfully',
+        updatedChat: chat
+    });
 };
