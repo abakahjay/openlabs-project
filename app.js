@@ -38,8 +38,16 @@ const googleAuth =require('./routes/googleAuth');
 const aiRoutes = require('./routes/chatAi');
 const aiImageRoutes = require('./routes/sendAiImage');
 const passport = require("passport");
+const User = require('./models/User.js');
 const { ClerkExpressRequireAuth }= require("@clerk/clerk-sdk-node");//This handles user logins  and stuff
 // console.log(ClerkExpressRequireAuth)
+
+app.use((req, res, next) => {
+    if (req.originalUrl === '/') {
+        console.log('Root POST hit — headers:', req.headers);
+    }
+    next();
+});
 
 
 const { spawn } = require('child_process');//Used to run python code with javascript
@@ -55,9 +63,21 @@ app.use(cors());//This allows connections from other ports
 
 
 // Serve the uploaded images from the /uploads folder in code
+// Serve the uploaded images from the /uploads folder in code
 app.use("/api/v1/auth/", uploadRoutes);
 
-app.use(bodyParser.json());
+// IMPORTANT: this must be registered BEFORE bodyParser.json()/express.json()
+// below. Paystack's webhook signature is an HMAC over the raw request bytes —
+// once a JSON parser has already turned the body into a JS object, the exact
+// original bytes are gone and the signature can no longer be verified.
+app.use('/api/v1/payments/webhook', express.raw({ type: 'application/json' }));
+
+app.use((req, res, next) => {
+    if (req.originalUrl === '/api/v1/payments/webhook') {
+        return next(); // already raw-parsed above; don't let this overwrite req.body
+    }
+    return bodyParser.json()(req, res, next);
+});
 app.use(logger("dev"));
 // app.use(morgan('tiny'))
 
@@ -136,23 +156,38 @@ const apiLimiter = rateLimiter({
 app.use("/api/", apiLimiter);
 
 
-app.use(xss());
-app.use(mongoSanitize());
+app.use((req, res, next) => {
+    if (req.originalUrl === '/api/v1/payments/webhook') {
+        return next(); // req.body is a raw Buffer here — these sanitizers expect parsed objects
+    }
+    return xss()(req, res, next);
+});
+app.use((req, res, next) => {
+    if (req.originalUrl === '/api/v1/payments/webhook') {
+        return next();
+    }
+    return mongoSanitize()(req, res, next);
+});
 app.use(cookieParser(process.env.JWT_SECRET));
 app.use(fileUpload());
 
 
 // Parse incoming JSON requests
+// Parse incoming JSON requests
 app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-
+app.use((req, res, next) => {
+    if (req.originalUrl === '/api/v1/payments/webhook') {
+        return next();
+    }
+    return express.json()(req, res, next);
+});
 
 // Routes to API's
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/auth", googleAuth);
 app.use('/api/v1/products', productsRouter)
 app.use('/api/v1/cart', cartRouter)
-app.use('/api/v1/orders', ordersRouter)
+app.use('/api/v1/orderss', ordersRouter)
 app.use('/api/v1/delivery', deliveryRouter)
 app.use('/api/v1/changedel', changeDelRouter)
 app.use('/api/v1/messages', messageRoutes);
@@ -162,6 +197,13 @@ app.use('/api/v1/comments', commentRoutes);
 
 //This is for the Ai
 app.use('/api/v1/ai',aiRoutes );
+
+//Seabrigde app
+app.use('/api/v1/dashboard', require('./routes/dashboard.js'));
+app.use('/api/v1/produce', require('./routes/produce.js'));
+app.use('/api/v1/orders', require('./routes/order.js'));
+app.use('/api/v1/payments', require('./routes/payment.js'));
+app.use('/api/v1/ussd', require('./routes/ussd.js'));
 
 
 
@@ -201,8 +243,32 @@ const start = async () => {
         //Connect the Database
         //We must always include our connect database method in the server application
         await connectDB(process.env.MONGO_URI).then(() => {
+            console.log('\x1b[36m%s\x1b[0m',`Database connected: ${process.env.MONGO_URI}`)
             console.log('\x1b[36m%s\x1b[0m','Connected to MongoDB...')
         })
+        try {
+            const collection = User.collection;
+            const existingIndexes = await collection.indexes();
+
+            for (const fieldName of ['email', 'username']) {
+                const indexName = `${fieldName}_1`;
+                const existing = existingIndexes.find((idx) => idx.name === indexName);
+
+                // Drop it if it exists but isn't sparse — a plain unique index
+                // on an optional field is exactly what causes duplicate-key
+                // errors on null/missing values.
+                if (existing && !existing.sparse) {
+                    await collection.dropIndex(indexName);
+                    console.log('\x1b[36m%s\x1b[0m', `Dropped stale non-sparse index: ${indexName}`);
+                }
+            }
+
+            await User.syncIndexes();
+            console.log('\x1b[36m%s\x1b[0m', 'User indexes synced with schema');
+        } catch (indexErr) {
+            console.log('\x1b[33m%s\x1b[0m', `Warning: failed to sync User indexes: ${indexErr.message}`);
+        }
+
 
         server.listen(port, console.log('\x1b[42m%s\x1b[0m', `Server Listening on === http://localhost:${port}`));
         // https.createServer(sslOptions, app).listen(port, () => {
